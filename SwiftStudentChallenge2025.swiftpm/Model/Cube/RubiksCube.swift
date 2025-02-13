@@ -20,7 +20,6 @@ class RubiksCube: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     func createCube() {
         // materials
         let greenMaterial = SCNMaterial()
@@ -101,31 +100,36 @@ class RubiksCube: SCNNode {
         }
     }
     
-    
     func cubeOffsetDistance() -> Float {
         return Float(cubeWidth / 2)
     }
     
-    /// Retorna os cubos da face correta com base no `HandAction`
-    /// Face   Relative referancial position
-    /// Up (U)    y == +offset
+    /// returns the cubes on the correct face based on the `HandAction` made
+    /// FACE //// RELATIVE REFERENCIAL POSITION
+    /// Up (U)        y == +offset
     /// Down (D)    y == -offset
-    /// Right (R)    x == +offset
-    /// Left (L)    x == -offset
-    /// Front (F)    z == +offset
-    /// Back (B)    z == -offset
-    func getWall(forAxis axis: SCNVector3, layerPosition: Float) -> [SCNNode] {
+    /// Right (R)      x == +offset
+    /// Left (L)         x == -offset
+    /// Face (F)      z == +offset
+    /// Back (B)      z == -offset
+    func getWall(for action: HandAction) -> [SCNNode] {
+        let axis = action.axis
+        let layerPosition = action.layerPosition(for: self)
+        return getWall(forAxis: axis, layerPosition: layerPosition)
+    }
+
+    /// Retorna os cubos da face correta com base no eixo e posição da camada
+    private func getWall(forAxis axis: SCNVector3, layerPosition: Float) -> [SCNNode] {
         let nodes = self.childNodes { (child, _) -> Bool in
-            let childPosition = getChildPositions(forAxis: axis, node: child)
+            let childPosition = getChildPosition(forAxis: axis, node: child)
             return abs(childPosition - layerPosition) < 0.01
         }
         return nodes
     }
 
-       /// Obtém a posição do nó no eixo correto
-    func getChildPositions(forAxis axis: SCNVector3, node: SCNNode) -> Float {
+    /// Obtém a posição do nó no eixo correto
+    private func getChildPosition(forAxis axis: SCNVector3, node: SCNNode) -> Float {
         let position = node.position
-        
         if axis == SCNVector3(1, 0, 0) { // Eixo X (Direita/Esquerda)
             return position.x
         } else if axis == SCNVector3(0, 1, 0) { // Eixo Y (Cima/Baixo)

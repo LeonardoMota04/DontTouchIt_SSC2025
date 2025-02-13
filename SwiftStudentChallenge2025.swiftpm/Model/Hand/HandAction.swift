@@ -1,5 +1,5 @@
 //
-//  HandRotation.swift
+//  HandAction.swift
 //  SwiftStudentChallenge2025
 //
 //  Created by Leonardo Mota on 04/02/25.
@@ -8,34 +8,52 @@
 import Foundation
 import SceneKit
 
-enum HandAction {
+enum HandAction: Equatable {
+    /// cube controll
     case right(RotationType)
     case left(RotationType)
     case up(RotationType)
     case down(RotationType)
     case face(RotationType)
     case back(RotationType)
-    case none // Caso especial para "BG"
+    
+    // camera controll
+    case rotateCamera(RotationType)
+    
+    case none // unknown hand action (user is just moving their hands)
 
-    /// Retorna o eixo de rotação correspondente à ação
+    /// eixo de rotação correspondente
     var axis: SCNVector3 {
         switch self {
-        case .right, .left: return SCNVector3(1, 0, 0)  // Eixo X
-        case .up, .down: return SCNVector3(0, 1, 0)      // Eixo Y
-        case .face, .back: return SCNVector3(0, 0, 1)    // Eixo Z
-        case .none: return SCNVector3(0, 0, 0)           // Nenhum eixo
+        case .right, .left: return SCNVector3(1, 0, 0)  // X
+        case .up, .down: return SCNVector3(0, 1, 0)     // Y
+        case .face, .back: return SCNVector3(0, 0, 1)   // Z
+        case .rotateCamera: return SCNVector3(0, 1, 0)  // Y (rotação da câmera na horizontal)
+        case .none: return SCNVector3(0, 0, 0)          // none
         }
     }
 
-    /// Determina se a rotação é horária ou anti-horária
+    /// se a rotação é horária ou anti-horária
     var angle: CGFloat {
         switch self {
         case .right(let type), .up(let type), .face(let type):
             return type == .clockwise ? -.pi / 2 : .pi / 2
         case .left(let type), .down(let type), .back(let type):
             return type == .clockwise ? .pi / 2 : -.pi / 2
+        case .rotateCamera(let type):
+            return type == .clockwise ? -.pi / 2 : .pi / 2 // 90 graus para a esquerda ou direita
         case .none:
             return 0 // Nenhum ângulo
+        }
+    }
+
+    /// Retorna a posição da camada com base no eixo
+    func layerPosition(for cube: RubiksCube) -> Float {
+        let offset = cube.cubeOffsetDistance()
+        switch self {
+        case .right, .up, .face: return offset
+        case .left, .down, .back: return -offset
+        default: return 0
         }
     }
 
@@ -49,6 +67,7 @@ enum HandAction {
         case .down: return "Down - \(type)"
         case .face: return "Face - \(type)"
         case .back: return "Back - \(type)"
+        case .rotateCamera: return "Rotate Camera - \(type)"
         case .none: return "No action detected"
         }
     }
@@ -60,7 +79,7 @@ extension HandAction {
         case "BG":
             self = .none // Caso especial para "BG"
         case "RIGHTHAND_ROTATION":
-            self = .right(.clockwise) // Mapeia "RIGHTHAND_ROTATION" para uma rotação à direita no sentido horário
+            self = .rotateCamera(.counterclockwise) // Mapeia "RIGHTHAND_ROTATION" para uma rotação à direita no sentido horário
         default:
             return nil // Caso não reconhecido
         }

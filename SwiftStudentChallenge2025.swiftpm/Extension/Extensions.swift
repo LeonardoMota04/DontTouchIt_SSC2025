@@ -30,7 +30,7 @@ extension Float {
 }
 
 // SCNVector3 equatable so I can use it inside a SWITCH - CASE
-extension SCNVector3: @retroactive Equatable {
+extension SCNVector3: Equatable {
     public static func == (lhs: SCNVector3, rhs: SCNVector3) -> Bool {
         return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
     }

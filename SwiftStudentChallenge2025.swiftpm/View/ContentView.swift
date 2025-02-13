@@ -71,9 +71,7 @@ struct ContentView: View {
         
         let adjustedRotation = cameraVM.viewController.adjustedRotation(rotation)
         
-        cameraVM.viewController.rotate(adjustedRotation) { _ in
-            print("Rotated \(rotation) → Adjusted: \(adjustedRotation)")
-        }
+        cameraVM.viewController.rotate(adjustedRotation)
     }
 }
 #Preview {
