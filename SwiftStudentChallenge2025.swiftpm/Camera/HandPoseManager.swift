@@ -10,10 +10,10 @@ import CoreML
 
 class HandPoseManager {
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
-    private let handActionModel = try? PrimeiroTesteRotacaoMaoUnica_9(configuration: MLModelConfiguration())
-    private let confidenceThreshold: Float = 0.8
+    private let handActionModel = try? SwiftStudentChallenge2025_HandActionClassifier_3_copy(configuration: MLModelConfiguration())
+    private let confidenceThreshold: Float = 0.95
     private var queue: [MLMultiArray] = []
-    private let queueSize = 30
+    private let queueSize = 15
     
     var onPredictionUpdate: ((HandAction) -> Void)?
     
@@ -23,9 +23,16 @@ class HandPoseManager {
         
         do {
             try requestHandler.perform([handPoseRequest])
-            if let results = handPoseRequest.results {
-                for observation in results {
-                    processObservation(observation)
+            
+            if handPoseRequest.results?.isEmpty ?? true {
+                DispatchQueue.main.async {
+                    self.onPredictionUpdate?(.none)
+                }
+            } else {
+                if let results = handPoseRequest.results {
+                    for observation in results {
+                        processObservation(observation)
+                    }
                 }
             }
         } catch {

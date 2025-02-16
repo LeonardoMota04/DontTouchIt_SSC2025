@@ -40,6 +40,8 @@ let package = Package(
             path: ".",
             resources: [
                 .copy("Resources/PrimeiroTesteRotacaoMaoUnica 9.mlmodelc"),
+                .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 3.mlmodelc"),
+                .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 3 copy.mlmodelc"),
                 .process("Resources/Assets.xcassets")
             ]
         )

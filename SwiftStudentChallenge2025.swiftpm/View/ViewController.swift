@@ -17,7 +17,7 @@ class CubeViewController: UIViewController {
     }
     
     // MARK: - HAND CUBE CONTROLL
-    // hand action made to controll the cube
+    /// hand action made to controll the cube
     var previousHandAction: HandAction? = HandAction.none
     var handAction: HandAction? {
         didSet {
@@ -27,9 +27,11 @@ class CubeViewController: UIViewController {
                 switch newAction {
                     // camera hand action
                     case .rotateCamera:
-                        updateCameraRotation(based: newAction)
+                    updateCameraRotation(based: newAction)
+                    
                     // cube hand action
-                    default: rotate(newAction)
+                    default:
+                        rotate(adjustedRotation(newAction))
                 }
             }
             
@@ -315,7 +317,6 @@ class CubeViewController: UIViewController {
         SCNTransaction.commit()
         
         currentAngleY += rotationAngle
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.isUserControllingCamera = false
         }

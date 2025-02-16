@@ -76,12 +76,14 @@ enum HandAction: Equatable {
 extension HandAction {
     init?(predictionLabel: String) {
         switch predictionLabel {
-        case "BG":
-            self = .none // Caso especial para "BG"
-        case "RIGHTHAND_ROTATION":
-            self = .rotateCamera(.counterclockwise) // Mapeia "RIGHTHAND_ROTATION" para uma rotação à direita no sentido horário
+        case "NONE":
+            self = .none
+        case "RIGHT-clockwise":
+            self = .right(.clockwise)
+        case "CAMERA-clockwise":
+            self = .rotateCamera(.counterclockwise)
         default:
-            return nil // Caso não reconhecido
+            return nil
         }
     }
 }
