@@ -32,13 +32,25 @@ class HeadDirectionDetector {
         rightEye: CGPoint,
         screenSize: CGSize
     ) -> HeadDistanceFromCenter {
-        // Calcular o ponto central dos olhos
+        
+        // EYES CENTRAL POINT
         let eyeCenterX = (leftEye.x + rightEye.x) / 2
         let eyeCenterY = (leftEye.y + rightEye.y) / 2
 
-        // Distância horizontal e vertical, normalizada de 0 a 100
-        let horizontalDistance = ((eyeCenterX / screenSize.width) * 100)
-        let verticalDistance = ((eyeCenterY / screenSize.height) * 100)
+        // DEALING WITH IPAD CAMERAS IN THE SIDE
+        // MARK: - 100 <---------------> 0
+        let screenSize = UIScreen.main.bounds.size
+        let cameraOffsetX = screenSize.width * 0.15
+        let logicalCenterY = screenSize.height / 2
+        
+        let minX = cameraOffsetX
+        let maxX = screenSize.width - cameraOffsetX
+        
+        let horizontalDistance = ((eyeCenterX - minX) / (maxX - minX)) * 100
+        let verticalDistance = ((eyeCenterY - logicalCenterY) / (screenSize.height / 2)) * 100
+
+
+        print(horizontalDistance)
 
         return HeadDistanceFromCenter(horizontal: horizontalDistance, vertical: verticalDistance)
     }

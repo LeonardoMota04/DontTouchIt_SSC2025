@@ -28,7 +28,7 @@ struct AlertCardView: View {
                     
                     Spacer()
                     
-                    Image(phase.image)
+                    phase.image
                         .resizable()
                         .scaledToFit()
                     

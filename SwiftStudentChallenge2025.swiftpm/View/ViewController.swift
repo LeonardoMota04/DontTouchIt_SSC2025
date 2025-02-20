@@ -9,7 +9,6 @@ import UIKit
 import SceneKit
 
 class CubeViewController: UIViewController {
-   
     // MARK: - HEAD CAMERA CONTROLL
     /// head distance from screen center
     var headDistanceFromCenter: HeadDistanceFromCenter? {
@@ -147,10 +146,10 @@ class CubeViewController: UIViewController {
         let wallHeight: Float = 20
         let wallThickness: Float = 0.2
         let floorHeight: Float = 0.2
-        let roomYOffset: Float = 8
-
-        let wallTexture = UIImage(resource: .bgWalls) // Textura das paredes
-        let floorCeilingTexture = UIImage(resource: .concrete) // Textura do chão/teto
+        var roomYOffset: Float = 7
+        
+        let wallTexture = UIImage(named: "bgWalls") // Textura das paredes
+        let floorCeilingTexture = UIImage(named: "concrete") // Textura do chão/teto
 
         func createWall(width: Float, height: Float, depth: Float, position: SCNVector3, texture: UIImage?) -> SCNNode {
             let wallGeometry = SCNBox(width: CGFloat(width), height: CGFloat(height), length: CGFloat(depth), chamferRadius: 0)
@@ -158,11 +157,6 @@ class CubeViewController: UIViewController {
             let material = SCNMaterial()
             material.diffuse.contents = texture ?? UIColor.gray
             material.lightingModel = .phong
-
-            // Ajuste de repetição da textura
-            material.diffuse.wrapS = .repeat
-            material.diffuse.wrapT = .repeat
-            //material.diffuse.contentsTransform = SCNMatrix4MakeScale(5, 5, 1)
 
             wallGeometry.materials = [material]
 
@@ -362,17 +356,19 @@ class CubeViewController: UIViewController {
     func updateCameraRotationBasedOnUserHead() {
         guard let distance = headDistanceFromCenter, !isUserControllingCamera else { return }
         
-        let sensitivity: Float = 0.03
-        let maxRotationAngle: Float = .pi / 4 // 45 degrees
+        let sensitivity: Float = 0.015
+        let maxRotation: Float = .pi / 4  // 45 degrees para os movimentos de rotação normal
+        
+        let maxRotationXDown: Float = .pi / 12  // 15 degrees para evitar atravessar o chão
         
         // horizontal offset
-        let horizontalOffset = Float(distance.horizontal - 50) * sensitivity
-        let targetRotationY = clamp(value: horizontalOffset, min: -maxRotationAngle, max: maxRotationAngle)
+        let horizontalOffset = Float(distance.horizontal - 25) * sensitivity
+        let targetRotationY = clamp(value: horizontalOffset, min: -maxRotation, max: maxRotation)
         
-        // vertical offset
-        let verticalOffset = Float(distance.vertical - 60) * sensitivity
-        let targetRotationX = clamp(value: verticalOffset, min: -maxRotationAngle, max: maxRotationAngle)
-        
+        // vertical offset com limite para o chão (somente para baixo)
+        let verticalOffset = Float(distance.vertical) * sensitivity
+        let targetRotationX = clamp(value: verticalOffset, min: -maxRotationXDown, max: maxRotation)
+
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 0.1
         cameraNode.eulerAngles.y = currentAngleY - targetRotationY
@@ -382,6 +378,7 @@ class CubeViewController: UIViewController {
     private func clamp(value: Float, min: Float, max: Float) -> Float {
         return Swift.max(min, Swift.min(max, value))
     }
+
     
     func updateCameraRotation(based onAction: HandAction) {
         guard case .rotateCamera(let rotationType) = onAction else { return }

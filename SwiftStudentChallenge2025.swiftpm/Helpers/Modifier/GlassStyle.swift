@@ -95,7 +95,7 @@ struct GlassStyle<S: Shape>: ViewModifier {
 
 #Preview {
     ZStack {
-        Image(.concrete).ignoresSafeArea()
+        //Image(.concrete).ignoresSafeArea()
         
         VStack {
 //            Text("ooiiiiiooooo")

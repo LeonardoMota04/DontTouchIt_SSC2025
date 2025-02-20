@@ -18,15 +18,13 @@ class CameraViewModel: ObservableObject {
     @Published var predictedAction: HandAction?
     @Published var headInclination: HeadInclination?
     @Published var distanceFromCenter: HeadDistanceFromCenter?
-    @Published var currentAppState: AppState = .sceneTutorial(.intro)
+    @Published var currentAppState: AppState = .home
 
     private var stateAction: AppStateAction?
 
     init() {
         cameraManager.delegate = self
         cameraManager.startSession()
-
-        updateStateAction()
 
         handPoseManager.onPredictionUpdate = { [weak self] action in
             self?.predictedAction = action
@@ -41,18 +39,7 @@ class CameraViewModel: ObservableObject {
             self?.stateAction?.handleHeadDistance(distance)
         }
     }
-
-    func updateStateAction() {
-        switch currentAppState {
-        case .home:
-            stateAction = HomeStateAction()
-        case .storyTellingBegginig:
-            stateAction = StoryTellingStateAction()
-        default:
-            stateAction = nil
-        }
-    }
-
+    
     func stopCameraSession() {
         cameraManager.stopSession()
     }

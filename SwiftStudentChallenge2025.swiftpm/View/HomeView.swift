@@ -11,12 +11,18 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
     
+    // HEAD
     @State private var isTiltingHeadLEFT: Bool = false
     @State private var isTiltingHeadRIGHT: Bool = false
+    
+    // HEAD PROGRESS TIMER
     @State private var progress: CGFloat = 0
     @State private var loadingTimer: Timer?
+    let loadingDuration: TimeInterval = 5.0
     
-    let loadingDuration: TimeInterval = 5.0 // Tempo necessário para completar o carregamento
+    // ANIMATION
+    @State private var itemsOffset: CGFloat = 400
+    
     
     var body: some View {
         GeometryReader { geo in
@@ -27,6 +33,7 @@ struct HomeView: View {
                 Text("DO NOT \n\(Text("TOUCH").foregroundStyle(.purple).bold()) \nIT")
                     .font(.system(size: 80, weight: .thin))
                     .foregroundStyle(.white)
+                    .offset(y: -itemsOffset)
                 
                 Spacer()
                 
@@ -36,12 +43,13 @@ struct HomeView: View {
                         .foregroundStyle(.white)
 
                     
-                    Image(.tiltYourHead)
+                    Image("tiltYourHead")
                     
                     Text("LEFT to full experience and RIGHT to free mode")
                 }
                 .font(.title3)
                 .foregroundStyle(.white)
+                .offset(y: itemsOffset)
                 
             }
             .padding(.vertical, 60)
@@ -90,8 +98,8 @@ struct HomeView: View {
                 let wasTilting = isTiltingHeadLEFT || isTiltingHeadRIGHT
                 
                 withAnimation {
-                    isTiltingHeadRIGHT = newValue.horizontal < 30
-                    isTiltingHeadLEFT = newValue.horizontal > 70
+                    isTiltingHeadRIGHT = newValue.horizontal < 10
+                    isTiltingHeadLEFT = newValue.horizontal > 60
                 }
                 
                 let isNowTilting = isTiltingHeadLEFT || isTiltingHeadRIGHT
@@ -104,6 +112,11 @@ struct HomeView: View {
             }
         }
         .ignoresSafeArea()
+        .onAppear {
+            withAnimation(Animation.bouncy(duration: 1.5).delay(0.5)) {
+                itemsOffset = 0
+            }
+        }
     }
     
     private func startLoading() {
@@ -114,7 +127,13 @@ struct HomeView: View {
             if progress >= 1 {
                 timer.invalidate()
                 DispatchQueue.main.async {
-                    cameraVM.currentAppState = .storyTellingBegginig(.first)
+                    // MARK: - LEFT (GOES TO SCENE)
+                    if isTiltingHeadLEFT {
+                        cameraVM.currentAppState = .storyTellingBegginig(.first)
+                    // MARK: - RIGHT (GOES TO FREE MODE)
+                    } else if isTiltingHeadRIGHT {
+                        cameraVM.currentAppState = .freeMode
+                    }
                 }
             } else {
                 progress += 0.1 / CGFloat(loadingDuration)
