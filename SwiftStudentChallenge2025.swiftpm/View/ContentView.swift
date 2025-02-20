@@ -79,9 +79,13 @@ struct ContentView: View {
                         }
                     },
                     onTapPhase: { newPhase in
+                        print("entrei aqui")
+                        print("estado antes: \(cameraVM.currentAppState)")
                         cameraVM.currentAppState = .sceneTutorial(newPhase)
+                        print("estado dps: \(cameraVM.currentAppState)")
                     }
                 )
+
             case .freeMode:
                 Text("FREE MODE")
                     .foregroundStyle(.white)
@@ -108,10 +112,6 @@ struct HUDView: View {
             onHomeTap()
         }
     }
-}
-
-#Preview {
-    HUDView() {}
 }
 
 #Preview {

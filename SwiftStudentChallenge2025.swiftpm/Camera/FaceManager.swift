@@ -49,9 +49,6 @@ class HeadDirectionDetector {
         let horizontalDistance = ((eyeCenterX - minX) / (maxX - minX)) * 100
         let verticalDistance = ((eyeCenterY - logicalCenterY) / (screenSize.height / 2)) * 100
 
-
-        print(horizontalDistance)
-
         return HeadDistanceFromCenter(horizontal: horizontalDistance, vertical: verticalDistance)
     }
 }

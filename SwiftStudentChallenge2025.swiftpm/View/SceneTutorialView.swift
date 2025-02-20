@@ -26,7 +26,6 @@ struct SceneTutorialView: View {
             let width = geo.size.width
 
             ZStack(alignment: .topLeading) {
-                // 🔹 Renderiza os outros cards e os torna clicáveis
                 HStack(spacing: 0) {
                     ForEach(SceneTutorialPhases.allCases.filter { ($0 != phase && $0 != .intro) }, id: \.self) { phaseItem in
                         CardView(phase: phaseItem, geo: geo, isInteracting: true, isMainCard: false)
@@ -48,12 +47,11 @@ struct SceneTutorialView: View {
                                 }
                             }
                             .opacity(hasCompletedAllSteps ? 0.5 : 0)
+                            .contentShape(Rectangle())
                         
                     }
                 }
                 .padding(.leading, isInteractingWithTheCube ? (width / 8 + 50) : 0)
-
-                // 🔹 Renderiza o card principal
                 CardView(phase: phase, geo: geo, isInteracting: isInteractingWithTheCube, isMainCard: true)
                     .onTapGesture {
                         if previousPhases.contains(phase) {
@@ -108,8 +106,11 @@ struct SceneTutorialView: View {
     }
 }
 
+#Preview {
+    ContentView()
+        .environmentObject(CameraViewModel())
+}
 
-// 🔹 Componente para os cards, simplificando o código principal
 struct CardView: View {
     let phase: SceneTutorialPhases
     let geo: GeometryProxy
