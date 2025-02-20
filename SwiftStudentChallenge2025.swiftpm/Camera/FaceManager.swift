@@ -8,7 +8,6 @@
 import Vision
 import UIKit
 
-/// Class utilitária para cálculos da cabeça
 class HeadDirectionDetector {
     static func calculateInclination(
         leftEye: CGPoint,
@@ -52,7 +51,8 @@ class FaceManager {
 
     func processFace(from sampleBuffer: CMSampleBuffer) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
+        // TODO: - LIDAR COM ORIENTACAO DO IPAD
+        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .down)
 
         do {
             try requestHandler.perform([faceLandmarksRequest])
@@ -102,6 +102,22 @@ class FaceManager {
             x: point.x * boundingBox.width * UIScreen.main.bounds.width + boundingBox.origin.x * UIScreen.main.bounds.width,
             y: point.y * boundingBox.height * UIScreen.main.bounds.height + boundingBox.origin.y * UIScreen.main.bounds.height
         )
+    }
+    
+    // getting ipad orientation
+    func currentOrientation() -> CGImagePropertyOrientation {
+        let orientation = UIDevice.current.orientation
+        
+        switch orientation {
+        case .landscapeLeft:
+            return .right
+        case .landscapeRight:
+            return .left
+        case .portraitUpsideDown:
+            return .up
+        default:
+            return .down
+        }
     }
 }
 

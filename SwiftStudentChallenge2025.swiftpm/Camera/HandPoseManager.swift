@@ -7,11 +7,12 @@
 
 import Vision
 import CoreML
+import UIKit
 
 class HandPoseManager {
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
-    private let handActionModel = try? SwiftStudentChallenge2025_HandActionClassifier_3_copy(configuration: MLModelConfiguration())
-    private let confidenceThreshold: Float = 0.95
+    private let handActionModel = try? SwiftStudentChallenge2025_HandActionClassifier_5(configuration: MLModelConfiguration())
+    private let confidenceThreshold: Float = 0.8
     private var queue: [MLMultiArray] = []
     private let queueSize = 15
     
@@ -19,22 +20,22 @@ class HandPoseManager {
     
     func processHandPose(from sampleBuffer: CMSampleBuffer) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
+        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .down)
         
         do {
             try requestHandler.perform([handPoseRequest])
             
-            if handPoseRequest.results?.isEmpty ?? true {
-                DispatchQueue.main.async {
-                    self.onPredictionUpdate?(.none)
-                }
-            } else {
+//            if handPoseRequest.results?.isEmpty ?? true {
+//                DispatchQueue.main.async {
+//                    self.onPredictionUpdate?(.none)
+//                }
+//            } else {
                 if let results = handPoseRequest.results {
                     for observation in results {
                         processObservation(observation)
                     }
                 }
-            }
+            //}
         } catch {
             print("Error processing hand pose: \(error)")
         }
@@ -62,4 +63,21 @@ class HandPoseManager {
             }
         }
     }
+    
+    // getting ipad orientation
+    func currentOrientation() -> CGImagePropertyOrientation {
+        let orientation = UIDevice.current.orientation
+        
+        switch orientation {
+        case .landscapeLeft:
+            return .right
+        case .landscapeRight:
+            return .left
+        case .portraitUpsideDown:
+            return .up
+        default:
+            return .down
+        }
+    }
+
 }

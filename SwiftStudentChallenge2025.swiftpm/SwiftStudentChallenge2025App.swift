@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct SwiftStudentChallenge2025App: App {
+    @StateObject private var cameraVM: CameraViewModel = .init()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(cameraVM)
         }
     }
 }

@@ -43,6 +43,11 @@ class RubiksCube: SCNNode {
         let blackMaterial = SCNMaterial()
         blackMaterial.diffuse.contents = UIColor.black
         
+        let reflectionMaterial = SCNMaterial()
+        reflectionMaterial.reflective.contents = UIColor.white
+        reflectionMaterial.reflective.intensity = 0.5 // Ajuste a intensidade do reflexo
+        reflectionMaterial.shininess = 1.0 // Ajuste o brilho
+
         // initial positions
         let cubeOffsetDistance = self.cubeOffsetDistance()
         var xPos:Float = -cubeOffsetDistance
@@ -81,7 +86,18 @@ class RubiksCube: SCNNode {
                         : [greenMaterial, redMaterial, blackMaterial, blackMaterial, whiteMaterial, blackMaterial]
                     }
                     
+                    
+                    
                     cubeGeometry.materials = materials
+                    
+                    let specularMaterial = SCNMaterial()
+                    specularMaterial.specular.contents = UIColor.white
+                    specularMaterial.shininess = 2
+
+                    for material in materials {
+                        material.specular.contents = specularMaterial.specular.contents
+                        material.shininess = specularMaterial.shininess
+                    }
                     
                     // creating cube
                     let cube = SCNNode(geometry: cubeGeometry)

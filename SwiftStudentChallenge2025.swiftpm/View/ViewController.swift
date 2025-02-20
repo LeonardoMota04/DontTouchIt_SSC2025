@@ -90,7 +90,38 @@ class CubeViewController: UIViewController {
         
         // light
         sceneView.autoenablesDefaultLighting = false
+        
+        createConcreteRoom()
+        addLighting()
     }
+    
+    func addLighting() {
+        // 💡 Luz principal (lâmpada no teto)
+        let ceilingLightNode = SCNNode()
+        let ceilingLight = SCNLight()
+        
+        ceilingLight.type = .omni // Luz que se espalha em todas as direções
+        ceilingLight.color = UIColor.white
+        ceilingLight.intensity = 800 // Iluminação não muito forte
+        ceilingLight.attenuationStartDistance = 5
+        ceilingLight.attenuationEndDistance = 50
+        
+        ceilingLightNode.light = ceilingLight
+        ceilingLightNode.position = SCNVector3(0, 10, 0) // No teto
+        
+        rootNode.addChildNode(ceilingLightNode)
+
+        // 🌫️ Luz ambiente fraca (para evitar escuridão total nas sombras)
+        let ambientLightNode = SCNNode()
+        let ambientLight = SCNLight()
+        
+        ambientLight.type = .ambient
+        ambientLight.color = UIColor.darkGray // Luz fraca, mas suficiente para as sombras não ficarem 100% escuras
+        
+        ambientLightNode.light = ambientLight
+        rootNode.addChildNode(ambientLightNode)
+    }
+
 
     // MARK: - CREATE CUBE
     func createRubiksCube() {
@@ -108,12 +139,60 @@ class CubeViewController: UIViewController {
         cameraNode.position = SCNVector3Make(0, 0, 0)
         cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -5) // CAMERA INITIAL POSITION
         cameraNode.eulerAngles = SCNVector3(0, 0, 0)
+        cameraNode.camera?.fieldOfView = 90
     }
+    
+    func createConcreteRoom() {
+        let floorSize: Float = 60
+        let wallHeight: Float = 20
+        let wallThickness: Float = 0.2
+        let floorHeight: Float = 0.2
+        let roomYOffset: Float = 8
+
+        let wallTexture = UIImage(resource: .bgWalls) // Textura das paredes
+        let floorCeilingTexture = UIImage(resource: .concrete) // Textura do chão/teto
+
+        func createWall(width: Float, height: Float, depth: Float, position: SCNVector3, texture: UIImage?) -> SCNNode {
+            let wallGeometry = SCNBox(width: CGFloat(width), height: CGFloat(height), length: CGFloat(depth), chamferRadius: 0)
+
+            let material = SCNMaterial()
+            material.diffuse.contents = texture ?? UIColor.gray
+            material.lightingModel = .phong
+
+            // Ajuste de repetição da textura
+            material.diffuse.wrapS = .repeat
+            material.diffuse.wrapT = .repeat
+            //material.diffuse.contentsTransform = SCNMatrix4MakeScale(5, 5, 1)
+
+            wallGeometry.materials = [material]
+
+            let wallNode = SCNNode(geometry: wallGeometry)
+            wallNode.position = position
+            return wallNode
+        }
+
+        // Criando os elementos da sala com diferentes texturas
+        let leftWall = createWall(width: wallThickness, height: wallHeight, depth: floorSize, position: SCNVector3(-floorSize / 2, roomYOffset, 0), texture: wallTexture)
+        let rightWall = createWall(width: wallThickness, height: wallHeight, depth: floorSize, position: SCNVector3(floorSize / 2, roomYOffset, 0), texture: wallTexture)
+        let backWall = createWall(width: floorSize, height: wallHeight, depth: wallThickness, position: SCNVector3(0, roomYOffset, -floorSize / 2), texture: wallTexture)
+        let frontWall = createWall(width: floorSize, height: wallHeight, depth: wallThickness, position: SCNVector3(0, roomYOffset, floorSize / 2), texture: wallTexture)
+
+        let floor = createWall(width: floorSize, height: floorHeight, depth: floorSize, position: SCNVector3(0, roomYOffset - wallHeight / 2, 0), texture: floorCeilingTexture)
+        let ceiling = createWall(width: floorSize, height: floorHeight, depth: floorSize, position: SCNVector3(0, roomYOffset + wallHeight / 2, 0), texture: floorCeilingTexture)
+
+        rootNode.addChildNode(leftWall)
+        rootNode.addChildNode(rightWall)
+        rootNode.addChildNode(backWall)
+        rootNode.addChildNode(frontWall)
+        rootNode.addChildNode(floor)
+        rootNode.addChildNode(ceiling)
+    }
+
   
     // MARK: - GESTURE RECOGNIZER
     func setupGestureRecognizer() {
         let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(sceneTouched(_:)))
-        sceneView.gestureRecognizers = [panRecognizer]
+        sceneView.gestureRecognizers = []
     }
     
     @objc
@@ -287,11 +366,11 @@ class CubeViewController: UIViewController {
         let maxRotationAngle: Float = .pi / 4 // 45 degrees
         
         // horizontal offset
-        let horizontalOffset = Float(distance.horizontal - 60) * sensitivity
+        let horizontalOffset = Float(distance.horizontal - 50) * sensitivity
         let targetRotationY = clamp(value: horizontalOffset, min: -maxRotationAngle, max: maxRotationAngle)
         
         // vertical offset
-        let verticalOffset = Float(distance.vertical - 50) * sensitivity
+        let verticalOffset = Float(distance.vertical - 60) * sensitivity
         let targetRotationX = clamp(value: verticalOffset, min: -maxRotationAngle, max: maxRotationAngle)
         
         SCNTransaction.begin()

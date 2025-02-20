@@ -82,6 +82,8 @@ extension HandAction {
             self = .right(.clockwise)
         case "CAMERA-clockwise":
             self = .rotateCamera(.counterclockwise)
+        case "CAMERA-counterclockwise":
+            self = .rotateCamera(.clockwise)
         default:
             return nil
         }

@@ -14,14 +14,26 @@ struct CameraViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> some UIView {
         let view = UIView(frame: UIScreen.main.bounds)
         
-        // configuration of the camera preview
+        let previewWidth = UIScreen.main.bounds.width * 0.3
+        let previewHeight = previewWidth * (9 / 16)
+        let padding: CGFloat = 50
+        
+        let previewFrame = CGRect(
+            x: UIScreen.main.bounds.width - previewWidth - padding,
+            y: padding,
+            width: previewWidth,
+            height: previewHeight
+        )
+        
         let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
-        previewLayer.frame = UIScreen.main.bounds
+        previewLayer.frame = previewFrame
+        previewLayer.borderWidth = 2
+        previewLayer.borderColor = UIColor.red.cgColor
+        previewLayer.cornerRadius = 8
         
-        // video rotation angle (landscape right)
         if let connection = previewLayer.connection {
-            connection.videoRotationAngle = 0
+            connection.videoRotationAngle = 180
         }
 
         view.layer.addSublayer(previewLayer)
@@ -31,12 +43,29 @@ struct CameraViewRepresentable: UIViewRepresentable {
 
     func updateUIView(_ uiView: UIViewType, context: Context) {
         if let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer {
-            previewLayer.frame = UIScreen.main.bounds
+            
+            let previewWidth = UIScreen.main.bounds.width * 0.3
+            let previewHeight = previewWidth * (9 / 16)
+            let padding: CGFloat = 50
+            
+            let previewFrame = CGRect(
+                x: UIScreen.main.bounds.width - previewWidth - padding,
+                y: padding,
+                width: previewWidth,
+                height: previewHeight
+            )
+            previewLayer.frame = previewFrame
+            
+            previewLayer.borderWidth = 2
+            previewLayer.borderColor = UIColor.red.cgColor
+            previewLayer.cornerRadius = 8
+            
             if let connection = previewLayer.connection {
-                connection.videoRotationAngle = 0
+                connection.videoRotationAngle = 180
             }
         }
     }
+    
 }
 
 
