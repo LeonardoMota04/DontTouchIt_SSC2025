@@ -8,23 +8,55 @@
 import SwiftUI
 
 struct SceneTutorialView: View {
+    @EnvironmentObject private var cameraVM: CameraViewModel
+
+    // phase information
     let phase: SceneTutorialPhases
+    var isFreeMode: Bool = false
+    
+    // taps closures
     var onTap: () -> Void
     var onTapPhase: (SceneTutorialPhases) -> Void
     
     private var hasCompletedAllSteps: Bool {
-        return previousPhases.count == SceneTutorialPhases.allCases.dropFirst().count
+        return((previousPhases.count == SceneTutorialPhases.allCases.dropFirst().count) || isFreeMode)
     }
     
-    @State private var isInteractingWithTheCube: Bool = false
+    // view state
+    @State private var isInteractingWithTheCube: Bool = false {
+        willSet {
+            if newValue {
+                guard phase != .intro, phase != .headCameraTracking else { return }
+                self.isButtonVisible = false
+                startTimer() 
+            }
+        }
+    }
     @State private var previousPhases: [SceneTutorialPhases] = []
     @State private var isButtonDisabled: Bool = false
-
+    @State private var isButtonVisible: Bool = true
+    @State private var remainingTime: Int = 8 // Tempo do timer em segundos
+    @State private var timer: Timer? // Referência do temporizador
+    
+    private func startTimer() {
+        remainingTime = 8 // Define o tempo inicial do temporizador
+        timer?.invalidate() // Para qualquer temporizador anterior, caso exista
+        
+        // Inicia o temporizador
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if remainingTime > 0 {
+                remainingTime -= 1
+            } else {
+                timer?.invalidate() // Para o temporizador quando chegar a 0
+                isButtonVisible = true // Torna o botão visível quando o tempo acabar
+            }
+        }
+    }
 
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
-
+            
             ZStack(alignment: .topLeading) {
                 HStack(spacing: 0) {
                     ForEach(SceneTutorialPhases.allCases.filter { ($0 != phase && $0 != .intro) }, id: \.self) { phaseItem in
@@ -32,7 +64,6 @@ struct SceneTutorialView: View {
                             .transition(.move(edge: .leading).combined(with: .opacity))
                             .onTapGesture {
                                 withAnimation(.bouncy) {
-                                    
                                     isInteractingWithTheCube.toggle()
                                     
                                     if isInteractingWithTheCube {
@@ -48,32 +79,43 @@ struct SceneTutorialView: View {
                             }
                             .opacity(hasCompletedAllSteps ? 0.5 : 0)
                             .contentShape(Rectangle())
-                        
                     }
                 }
                 .padding(.leading, isInteractingWithTheCube ? (width / 8 + 50) : 0)
                 CardView(phase: phase, geo: geo, isInteracting: isInteractingWithTheCube, isMainCard: true)
                     .onTapGesture {
-                        if previousPhases.contains(phase) {
-                            withAnimation(.bouncy) {
-                                isInteractingWithTheCube.toggle()
-                            }
+                        if (previousPhases.contains(phase) || isFreeMode) {
+                            withAnimation(.bouncy) { onTap() }
+                            return
                         }
                     }
+                    .opacity((isFreeMode && isInteractingWithTheCube) ? 0.5 : 1)
             }
         }
+        .onAppear { if isFreeMode { isInteractingWithTheCube = true } }
         .ignoresSafeArea()
+        .overlay(alignment: .bottomLeading) {
+            // MARK: - Circular Progress
+            if !isButtonVisible && !isFreeMode {
+                CircularProgressView(progress: CGFloat(remainingTime) / 8.0)
+                    .frame(width: 50, height: 50)
+                    .padding(50)
+                    .ignoresSafeArea()
+            }
+        }
         .overlay(alignment: .bottomTrailing) {
             // MARK: - BOTÃO
             CustomButton(icon: "arrow.right") {
-                guard !isButtonDisabled else { return }
-
                 if phase == .intro {
                     withAnimation(.bouncy) { onTap() }
                     return
                 }
 
                 if isInteractingWithTheCube {
+                    if phase == .handActionCubeRightSideRotation {
+                        withAnimation(.bouncy) { onTap() }
+                        return
+                    }
                     
                     withAnimation(.bouncy) {
                         isInteractingWithTheCube = false
@@ -98,13 +140,17 @@ struct SceneTutorialView: View {
                     }
                 }
             }
-            //.disabled(isButtonDisabled)
-            .padding(40)
-            //.opacity(hasCompletedAllSteps ? 0 : 1)
+            .disabled(isButtonDisabled)
+            .padding(50)
+            .opacity(isFreeMode ? 0 : isButtonVisible ? 1 : 0)
+            .ignoresSafeArea()
         }
-       // .onChange(of: p)
     }
 }
+
+
+
+
 
 #Preview {
     ContentView()

@@ -56,6 +56,12 @@ class CubeViewController: UIViewController {
     var rubiksCube: RubiksCube!
 
     // touch controll
+    var cameraHeadControllLock: Bool = true
+    var cameraHandControllLock: Bool = true
+    var cubeFaceRotationLock: Bool = true
+    var roomYOffset: Float = 6
+    
+    
     var beganPanHitResult: SCNHitTestResult!
     var beganPanNode: SCNNode!
     var rotationAxis:SCNVector3!
@@ -68,7 +74,6 @@ class CubeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScene()
-        setupGestureRecognizer()
         createRubiksCube()
         setupCamera()
     }
@@ -146,7 +151,7 @@ class CubeViewController: UIViewController {
         let wallHeight: Float = 20
         let wallThickness: Float = 0.2
         let floorHeight: Float = 0.2
-        var roomYOffset: Float = 7
+        var roomYOffset: Float = roomYOffset
         
         let wallTexture = UIImage(named: "bgWalls") // Textura das paredes
         let floorCeilingTexture = UIImage(named: "concrete") // Textura do chão/teto
@@ -183,178 +188,10 @@ class CubeViewController: UIViewController {
     }
 
   
-    // MARK: - GESTURE RECOGNIZER
-    func setupGestureRecognizer() {
-        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(sceneTouched(_:)))
-        sceneView.gestureRecognizers = []
-    }
-    
-    @objc
-    func sceneTouched(_ recognizer: UIPanGestureRecognizer) {
-        let location = recognizer.location(in: sceneView)
-        let hitResults = sceneView.hitTest(location, options: nil)
-        
-        // ROTATIONS
-        let translation = recognizer.translation(in: sceneView)
-        
-        // Perform rotation based on translation
-        let newRotationX = -Float(translation.y) * (.pi)/180
-        let newRotationY = -Float(translation.x) * (.pi)/180
-        
-        // MARK: - 2 FINGERS: CAMERA
-        if recognizer.numberOfTouches == 2  {
-            cameraNode.eulerAngles.x = currentAngleX + newRotationX
-            cameraNode.eulerAngles.y = currentAngleY + newRotationY
-        } else if recognizer.state == .ended {
-            currentAngleX = cameraNode.eulerAngles.x
-            currentAngleY = cameraNode.eulerAngles.y
-        }
-        
-        // MARK: - 1 FINGER: CUBE
-        if recognizer.numberOfTouches == 1
-            && hitResults.count > 0
-            && recognizer.state == .began
-            && beganPanNode == nil {
-            
-            beganPanHitResult = hitResults.first
-            beganPanNode = beganPanHitResult.node
-            
-        } else if recognizer.state == .ended && beganPanNode != nil && isRotating == false {
-
-            isRotating = true
-            
-            // TOUCH
-            let touch_Location = recognizer.location(in: sceneView) // touch position
-            let projectedOrigin = sceneView.projectPoint(beganPanHitResult.worldCoordinates) // initial coordinates from initial touch point in 3D
-            let estimatedPoint = sceneView.unprojectPoint(SCNVector3( Float(touch_Location.x),
-                                                                      Float(touch_Location.y),
-                                                                      projectedOrigin.z) )
-            
-            // PLANE
-            var plane = "?"
-            var direction = 1
-            
-            // DIFFS
-            let xDiff = estimatedPoint.x - beganPanHitResult.worldCoordinates.x // RELATIVE MOVEMENT SINCE BEGINING OF TOUCH UNTIL NOW
-            let yDiff = estimatedPoint.y - beganPanHitResult.worldCoordinates.y
-            let zDiff = estimatedPoint.z - beganPanHitResult.worldCoordinates.z
-            
-            let absXDiff = abs(xDiff)
-            let absYDiff = abs(yDiff)
-            let absZDiff = abs(zDiff)
-            
-            // SIDE TOUCHED (NOT ROTATED CUBE SIDE)
-            var side: CubeSide!
-            side = selectedCubeSide(hitResult: beganPanHitResult, edgeDistanceFromOrigin: edgeDistance975)
-            
-            if side == CubeSide.none {
-                self.isRotating = false
-                self.beganPanNode = nil
-                return
-            }
-            
-            // MARK: - DIRECTION
-            // RIGH ou LEFT
-            if side == CubeSide.right || side == CubeSide.left {
-                if absYDiff > absZDiff {
-                    plane = "Y"
-                    if side == CubeSide.right { direction = yDiff > 0 ? 1 : -1 }
-                    else { direction = yDiff > 0 ? -1 : 1 }
-                }
-                else {
-                    plane = "Z"
-                    if side == CubeSide.right {  direction = zDiff > 0 ? -1 : 1 }
-                    else { direction = zDiff > 0 ? 1 : -1 }
-                }
-            }
-            
-            // UP or DOWN
-            else if side == CubeSide.up || side == CubeSide.down {
-                if absXDiff > absZDiff {
-                    plane = "X"
-                    if side == CubeSide.up { direction = xDiff > 0 ? -1 : 1 }
-                    else { direction = xDiff > 0 ? 1 : -1 }
-                }
-                else {
-                    plane = "Z"
-                    if side == CubeSide.up { direction = zDiff > 0 ? 1 : -1 }
-                    else { direction = zDiff > 0 ? -1 : 1 }
-                }
-            }
-            
-            // BACK or FRONT
-            else if side == CubeSide.back || side == CubeSide.front {
-                if absXDiff > absYDiff {
-                    plane = "X"
-                    if side == CubeSide.back { direction = xDiff > 0 ? -1 : 1 }
-                    else { direction = xDiff > 0 ? 1 : -1 }
-                }
-                else {
-                    plane = "Y"
-                    if side == CubeSide.back { direction = yDiff > 0 ? 1 : -1 }
-                    else { direction = yDiff > 0 ? -1 : 1 }
-                }
-            }
-            
-            let nodesAdded =  rubiksCube.childNodes { (child, _) -> Bool in
-                // PLANE Z || PLANE X
-                if ((side == CubeSide.right || side == CubeSide.left) && plane == "Z")
-                    || ((side == CubeSide.front || side == CubeSide.back) && plane == "X") {
-                    self.rotationAxis = SCNVector3(0,1,0) // Y
-                    return child.position.y.isVeryClose(to: self.beganPanNode.position.y, withTolerance: tolerance25)
-                }
-                
-                // PLANE Y || PLANE X
-                if ((side == CubeSide.right || side == CubeSide.left) && plane == "Y")
-                    || ((side == CubeSide.up || side == CubeSide.down) && plane == "X") {
-                    self.rotationAxis = SCNVector3(0,0,1) // Z
-                    return child.position.z.isVeryClose(to: self.beganPanNode.position.z, withTolerance: tolerance25)
-                }
-                
-                // PLANE Y || PLANE Z
-                if ((side == CubeSide.front || side == CubeSide.back) && plane == "Y")
-                    || ((side == CubeSide.up || side == CubeSide.down) && plane == "Z") {
-                    self.rotationAxis = SCNVector3(1,0,0) // X
-                    return child.position.x.isVeryClose(to: self.beganPanNode.position.x, withTolerance: tolerance25)
-                }
-                return false
-            }
-            
-            // didn't catch any node on the cube, so cancel
-            if nodesAdded.count <= 0 {
-                self.isRotating = false
-                self.beganPanNode = nil
-                return
-            }
-            
-            // container that holds all nodes to rotate after touch finished
-            let container = SCNNode()
-            rootNode.addChildNode(container)
-            for nodeToRotate in nodesAdded {
-                container.addChildNode(nodeToRotate)
-            }
-            
-            // rotation action
-            let rotationAngle = CGFloat(direction) * .pi/2
-            let rotation_Action = SCNAction.rotate(by: rotationAngle, around: self.rotationAxis, duration: 0.2)
-            let finalRotation_Action: SCNAction = rotation_Action
-    
-            container.runAction(finalRotation_Action) {
-                for node: SCNNode in nodesAdded {
-                    let transform = node.parent!.convertTransform(node.transform, to: self.rubiksCube)
-                    node.removeFromParentNode()
-                    node.transform = transform
-                    self.rubiksCube.addChildNode(node)
-                }
-                self.isRotating = false
-                self.beganPanNode = nil
-            }
-        }
-    }
     
     // MARK: - CAMERA HEAD CONTROLL
     func updateCameraRotationBasedOnUserHead() {
-        guard let distance = headDistanceFromCenter, !isUserControllingCamera else { return }
+        guard let distance = headDistanceFromCenter, !isUserControllingCamera, !cameraHeadControllLock else { return }
         
         let sensitivity: Float = 0.015
         let maxRotation: Float = .pi / 4  // 45 degrees para os movimentos de rotação normal
@@ -379,9 +216,10 @@ class CubeViewController: UIViewController {
         return Swift.max(min, Swift.min(max, value))
     }
 
-    
+    // ROTATES THE ENTIRE CUBE
     func updateCameraRotation(based onAction: HandAction) {
         guard case .rotateCamera(let rotationType) = onAction else { return }
+        guard !cameraHandControllLock else { return }
         
         let rotationAngle: Float = rotationType == .clockwise ? -.pi / 2 : .pi / 2
         
@@ -497,7 +335,7 @@ class CubeViewController: UIViewController {
     // MARK: - ROTATES CUBE SIDE
     /// rotates a specific cube side based on the users hand action made
     func rotate(_ action: HandAction) {
-        guard !isRotating else { return }
+        guard !isRotating, !cubeFaceRotationLock else { return }
 
         isRotating = true
 
@@ -527,20 +365,194 @@ class CubeViewController: UIViewController {
             self.beganPanNode = nil
         }
     }
-    
-    // CUBE SELECTED SIDE (NOT ROTATED SIDE)
-    private func selectedCubeSide(hitResult: SCNHitTestResult, edgeDistanceFromOrigin:Float) -> CubeSide {
-        // X
-        if beganPanHitResult.worldCoordinates.x.isVeryClose(to: edgeDistanceFromOrigin, withTolerance: tolerance25) { return .right }
-        else if beganPanHitResult.worldCoordinates.x.isVeryClose(to: -edgeDistanceFromOrigin, withTolerance: tolerance25) { return .left }
-        
-        // Y
-        else if beganPanHitResult.worldCoordinates.y.isVeryClose(to: edgeDistanceFromOrigin, withTolerance: tolerance25) { return .up }
-        else if beganPanHitResult.worldCoordinates.y.isVeryClose(to: -edgeDistanceFromOrigin, withTolerance: tolerance25) { return .down }
-        
-        // Z
-        else if beganPanHitResult.worldCoordinates.z.isVeryClose(to: edgeDistanceFromOrigin, withTolerance: tolerance25) { return .front }
-        else if beganPanHitResult.worldCoordinates.z.isVeryClose(to: -edgeDistanceFromOrigin, withTolerance: tolerance25) { return .back }
-        return .none
+
+    func updateAppState(_ state: AppState) {
+        switch state {
+        case .home:
+            // Voltar para a posição inicial da câmera e o pivot para -5
+            adjustCameraPositionToHome()
+            // Ajustar o roomYOffset para 6 na home
+            adjustRoomYOffsetToHome()
+            // Travar todos os controles
+            cameraHeadControllLock = true
+            cameraHandControllLock = true
+            cubeFaceRotationLock = true
+
+        case .storyTellingBegginig(let storyTellingBegginigPhases):
+            switch storyTellingBegginigPhases {
+            case .first:
+                // Anima a câmera para o pivot -3
+                adjustCameraPositionPhaseFirst()
+                // Ajusta o roomYOffset para 8 na fase primeira
+                adjustRoomYOffsetToFirstPhase()
+
+                // Inicia a animação de rotação do Rubik's Cube
+                animateRubiksCubeRotation(startAngle: 0, numberOfRotations: 20, duration: 15, isDecelerating: false) {
+                    // A rotação começou devagar e acelerou, agora é o ponto mais rápido da animação
+                    self.finalRotationAngle = self.rubiksCube.rotation.w
+                }
+
+            case .fourth:
+                // Reverte a animação para o cubo desacelerando
+                animateRubiksCubeRotation(startAngle: finalRotationAngle, numberOfRotations: 2, duration: 7, isDecelerating: true) {
+                    // Finaliza a animação
+                }
+                // Anima a câmera para o pivot -5
+                adjustCameraPositionPhaseFourth()
+                return
+
+            default:
+                break
+            }
+
+        case .alertsCards(let alertsCardsPhases):
+            // Aqui você pode adicionar lógica específica para esta fase, se necessário
+            return
+
+        case .sceneTutorial(let sceneTutorialPhases):
+            switch sceneTutorialPhases {
+            case .intro:
+                // Nada, apenas mantém o estado inicial
+                return
+
+            case .headCameraTracking:
+                // Cabeça liberada para controle
+                cameraHeadControllLock = false
+                return
+
+            case .handActionCameraRotation:
+                // Permitir rotação total do cubo com a mão
+                cameraHandControllLock = false
+                return
+
+            case .handActionCubeRightSideRotation:
+                // Permitir rotação de um lado do cubo
+                cubeFaceRotationLock = false
+            }
+
+        case .freeMode:
+            // Libera todos os controles
+            cameraHeadControllLock = false
+            cameraHandControllLock = false
+            cubeFaceRotationLock = false
+        }
     }
+
+
+    func adjustCameraPositionToHome() {
+        // Volta para a posição inicial e pivot em -5
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 2
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        // Restaura a posição e pivot da câmera para o inicial
+        self.cameraNode.position = SCNVector3Make(0, 0, 0)
+        self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -5)
+        self.cameraNode.eulerAngles = SCNVector3(0, 0, 0)
+        
+        //self.cameraIsMoving = true
+
+        SCNTransaction.completionBlock = { [self] in
+            //self.cameraIsMoving = false
+        }
+        SCNTransaction.commit()
+    }
+
+    func adjustCameraPositionPhaseFirst() {
+        // Animação para a fase "first" do storytelling (pivot para -3)
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 3
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -3)
+        
+        //self.cameraIsMoving = true
+
+        SCNTransaction.completionBlock = { [self] in
+            //self.cameraIsMoving = false
+        }
+        SCNTransaction.commit()
+    }
+
+    func adjustCameraPositionPhaseFourth() {
+        // Animação para a fase "fourth" do storytelling (pivot volta para -5)
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 3
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -5)
+        
+        //self.cameraIsMoving = true
+
+        SCNTransaction.completionBlock = { [self] in
+            //self.cameraIsMoving = false
+        }
+        SCNTransaction.commit()
+    }
+
+    func adjustRoomYOffsetToHome() {
+        // Ajuste do roomYOffset para 6 na home
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 2
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        // Ajustando o roomYOffset para 6
+        self.roomYOffset = 6
+
+        SCNTransaction.completionBlock = { [self] in
+            self.roomYOffset = 6
+        }
+        SCNTransaction.commit()
+    }
+
+    func adjustRoomYOffsetToFirstPhase() {
+        // Ajuste do roomYOffset para 8 na primeira fase do storytelling
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 3
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        // Ajustando o roomYOffset para 8
+        self.roomYOffset = 8
+
+        SCNTransaction.completionBlock = { [self] in
+            self.roomYOffset = 8
+        }
+        SCNTransaction.commit()
+    }
+    
+    // Função para animar o Rubik's Cube no eixo horizontal
+//    func animateRubiksCubeRotation(startAngle: Float, endAngle: Float, duration: TimeInterval, completion: @escaping () -> Void) {
+//        SCNTransaction.begin()
+//        SCNTransaction.animationDuration = duration
+//        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut) // Inicia devagar e depois acelera
+//
+//        // Aplica a rotação no eixo X do cubo (rotação horizontal)
+//        rubiksCube.rotation = SCNVector4(1, 0, 0, startAngle)
+//        rubiksCube.rotation = SCNVector4(1, 0, 0, endAngle)
+//
+//        SCNTransaction.completionBlock = completion
+//        SCNTransaction.commit()
+//    }
+    
+    var finalRotationAngle: Float = 0 // Variável para armazenar a rotação final
+
+    func animateRubiksCubeRotation(startAngle: Float, numberOfRotations: Int, duration: TimeInterval, isDecelerating: Bool, completion: @escaping () -> Void) {
+        let endAngle = Float(numberOfRotations) * .pi * 2 // Múltiplas rotações
+        let angleDifference = endAngle - startAngle // Diferença angular
+        
+        // A ação de rotação suave
+        let rotateAction = SCNAction.rotate(by: CGFloat(angleDifference), around: SCNVector3(0, 1, 0), duration: duration)
+        
+        // Determina a função de temporização (aceleração ou desaceleração)
+        rotateAction.timingMode = isDecelerating ? .easeOut : .easeIn
+
+        // Aplica a rotação no cubo
+        rubiksCube.runAction(rotateAction) {
+            // Chama o completion após o término da animação
+            completion()
+        }
+    }
+
+
+
 }

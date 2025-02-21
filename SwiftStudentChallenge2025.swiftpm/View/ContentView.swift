@@ -12,7 +12,8 @@ struct ContentView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
    
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack(alignment: .topTrailing) {
+            
             CubeView(viewController: cameraVM.viewController).ignoresSafeArea()
             
             switch cameraVM.currentAppState {
@@ -79,17 +80,12 @@ struct ContentView: View {
                         }
                     },
                     onTapPhase: { newPhase in
-                        print("entrei aqui")
-                        print("estado antes: \(cameraVM.currentAppState)")
                         cameraVM.currentAppState = .sceneTutorial(newPhase)
-                        print("estado dps: \(cameraVM.currentAppState)")
                     }
                 )
 
             case .freeMode:
-                Text("FREE MODE")
-                    .foregroundStyle(.white)
-                    .font(.largeTitle)
+                FreeModeView()
             }
             
             CameraViewRepresentable(captureSession: cameraVM.getCaptureSession())
@@ -103,14 +99,34 @@ struct ContentView: View {
     }
 }
 
+import SwiftUI
+
+struct FreeModeView: View {
+    @State private var phase = SceneTutorialPhases.handActionCubeRightSideRotation
+
+    var body: some View {
+        SceneTutorialView(phase: phase, isFreeMode: true, onTap: {
+        }, onTapPhase: { new in
+            //cameraVM.currentAppState = .sceneTutorial(new)
+            phase = new
+        })    }
+}
+
+import SwiftUI
 
 struct HUDView: View {
+    @EnvironmentObject private var cameraVM: CameraViewModel
+
     var onHomeTap: () -> Void
     
     var body: some View {
         CustomButton(icon: "house.fill") {
             onHomeTap()
         }
+        .animation(.easeInOut, value: cameraVM.currentAppState)
+        .opacity(cameraVM.currentAppState == .home ? 0 : 1)
+        .padding(50)
+        .ignoresSafeArea()
     }
 }
 

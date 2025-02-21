@@ -67,23 +67,23 @@ class RubiksCube: SCNNode {
                     var materials: [SCNMaterial] = []
                     if i == 0 && j == 0 {
                         materials = (k % 2 == 0)
-                        ? [blackMaterial, blackMaterial, blueMaterial, orangeMaterial, blackMaterial, yellowMaterial]
-                        : [blackMaterial, redMaterial, blueMaterial, blackMaterial, blackMaterial, yellowMaterial]
+                        ? [blackMaterial, blackMaterial, yellowMaterial, orangeMaterial, blackMaterial, greenMaterial]
+                        : [blackMaterial, redMaterial, yellowMaterial, blackMaterial, blackMaterial, greenMaterial]
                     }
                     if i == 0 && j == 1 {
                         materials = (k % 2 == 0)
-                        ? [blackMaterial, blackMaterial, blueMaterial, orangeMaterial, whiteMaterial, blackMaterial]
-                        : [blackMaterial, redMaterial, blueMaterial, blackMaterial, whiteMaterial, blackMaterial]
+                        ? [blackMaterial, blackMaterial, yellowMaterial, orangeMaterial, blueMaterial, blackMaterial]
+                        : [blackMaterial, redMaterial, yellowMaterial, blackMaterial, blueMaterial, blackMaterial]
                     }
                     if i == 1 && j == 0 {
                         materials = (k % 2 == 0)
-                        ? [greenMaterial, blackMaterial, blackMaterial, orangeMaterial, blackMaterial, yellowMaterial]
-                        : [greenMaterial, redMaterial, blackMaterial, blackMaterial, blackMaterial, yellowMaterial]
+                        ? [whiteMaterial, blackMaterial, blackMaterial, orangeMaterial, blackMaterial, greenMaterial]
+                        : [whiteMaterial, redMaterial, blackMaterial, blackMaterial, blackMaterial, greenMaterial]
                     }
                     if i == 1 && j == 1 {
                         materials = (k % 2 == 0)
-                        ? [greenMaterial, blackMaterial, blackMaterial, orangeMaterial, whiteMaterial, blackMaterial]
-                        : [greenMaterial, redMaterial, blackMaterial, blackMaterial, whiteMaterial, blackMaterial]
+                        ? [whiteMaterial, blackMaterial, blackMaterial, orangeMaterial, blueMaterial, blackMaterial]
+                        : [whiteMaterial, redMaterial, blackMaterial, blackMaterial, blueMaterial, blackMaterial]
                     }
                     
                     
