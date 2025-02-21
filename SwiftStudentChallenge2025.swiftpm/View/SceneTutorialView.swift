@@ -60,6 +60,8 @@ struct SceneTutorialView: View {
             ZStack(alignment: .topLeading) {
                 HStack(spacing: 0) {
                     ForEach(SceneTutorialPhases.allCases.filter { ($0 != phase && $0 != .intro) }, id: \.self) { phaseItem in
+                        
+                        // MARK: - BACKGROUND CARD
                         CardView(phase: phaseItem, geo: geo, isInteracting: true, isMainCard: false)
                             .transition(.move(edge: .leading).combined(with: .opacity))
                             .onTapGesture {
@@ -73,7 +75,6 @@ struct SceneTutorialView: View {
                                             }
                                         }
                                     }
-                                    
                                     onTapPhase(phaseItem)
                                 }
                             }
@@ -82,11 +83,13 @@ struct SceneTutorialView: View {
                     }
                 }
                 .padding(.leading, isInteractingWithTheCube ? (width / 8 + 50) : 0)
+                
+                // MARK: - MAIN CARD
                 CardView(phase: phase, geo: geo, isInteracting: isInteractingWithTheCube, isMainCard: true)
                     .onTapGesture {
                         if (previousPhases.contains(phase) || isFreeMode) {
                             withAnimation(.bouncy) { onTap() }
-                            return
+//                            return
                         }
                     }
                     .opacity((isFreeMode && isInteractingWithTheCube) ? 0.5 : 1)
@@ -94,7 +97,7 @@ struct SceneTutorialView: View {
         }
         .onAppear { if isFreeMode { isInteractingWithTheCube = true } }
         .ignoresSafeArea()
-        .overlay(alignment: .bottomLeading) {
+        .overlay(alignment: .bottomTrailing) {
             // MARK: - Circular Progress
             if !isButtonVisible && !isFreeMode {
                 CircularProgressView(progress: CGFloat(remainingTime) / 8.0)
@@ -230,9 +233,16 @@ struct CardView: View {
 
 #Preview {
     struct scenetutorialviewPreview: View {
+//        @State private var phase: AppState = .freeMode
         @State private var phase: SceneTutorialPhases = .intro
 
         var body: some View {
+//            SceneTutorialView(phase: .handActionCubeRightSideRotation, isFreeMode: true) {
+//                
+//            } onTapPhase: { newPhase in
+//                
+//            }
+
             SceneTutorialView(phase: phase) {
                 switch phase {
                 case .intro:

@@ -10,7 +10,8 @@ import SceneKit
 
 struct ContentView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
-   
+    @State private var showPreview: Bool = false
+    
     var body: some View {
         ZStack(alignment: .topTrailing) {
             
@@ -88,14 +89,21 @@ struct ContentView: View {
                 FreeModeView()
             }
             
-            CameraViewRepresentable(captureSession: cameraVM.getCaptureSession())
-                .allowsHitTesting(false)
-            
-            HUDView() {
-                cameraVM.currentAppState = .home
+            if showPreview {
+                CameraViewRepresentable(captureSession: cameraVM.getCaptureSession())
+                    .allowsHitTesting(false)
             }
+            
+            HUDView(onHomeTap: {
+                cameraVM.currentAppState = .home
+            }, onCameraTap: {
+                withAnimation(.smooth) { showPreview.toggle() }
+            })
+
+        
         }
         .onDisappear { cameraVM.stopCameraSession() }
+
     }
 }
 
@@ -106,10 +114,11 @@ struct FreeModeView: View {
 
     var body: some View {
         SceneTutorialView(phase: phase, isFreeMode: true, onTap: {
+            
         }, onTapPhase: { new in
-            //cameraVM.currentAppState = .sceneTutorial(new)
             phase = new
-        })    }
+        })
+    }
 }
 
 import SwiftUI
@@ -118,17 +127,28 @@ struct HUDView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
 
     var onHomeTap: () -> Void
+    var onCameraTap: () -> Void
     
     var body: some View {
-        CustomButton(icon: "house.fill") {
-            onHomeTap()
+        VStack {
+            if cameraVM.currentAppState != .home {
+                CustomButton(icon: "house.fill") {
+                    onHomeTap()
+                }
+            }
+                        
+            CustomButton(icon: "eye.fill") {
+                onCameraTap()
+            }
+            .padding(.top, 8)
+        
         }
         .animation(.easeInOut, value: cameraVM.currentAppState)
-        .opacity(cameraVM.currentAppState == .home ? 0 : 1)
         .padding(50)
         .ignoresSafeArea()
     }
 }
+
 
 #Preview {
     @Previewable @StateObject var cameraVM: CameraViewModel = .init()

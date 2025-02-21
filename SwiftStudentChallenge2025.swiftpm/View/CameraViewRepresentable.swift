@@ -14,12 +14,12 @@ struct CameraViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> some UIView {
         let view = UIView(frame: UIScreen.main.bounds)
         
-        let previewWidth = UIScreen.main.bounds.width * 0.3
+        let previewWidth = UIScreen.main.bounds.width * 0.2
         let previewHeight = previewWidth * (9 / 16)
         let padding: CGFloat = 50
         
         let previewFrame = CGRect(
-            x: UIScreen.main.bounds.width - previewWidth - padding,
+            x: UIScreen.main.bounds.width - previewWidth - padding - 100,
             y: padding,
             width: previewWidth,
             height: previewHeight
@@ -29,8 +29,8 @@ struct CameraViewRepresentable: UIViewRepresentable {
         previewLayer.videoGravity = .resizeAspectFill
         previewLayer.frame = previewFrame
         previewLayer.borderWidth = 2
-        previewLayer.borderColor = UIColor.red.cgColor
-        previewLayer.cornerRadius = 8
+        previewLayer.borderColor = UIColor.purple.cgColor
+        previewLayer.cornerRadius = 15
         
         if let connection = previewLayer.connection {
             connection.videoRotationAngle = 180
@@ -44,12 +44,12 @@ struct CameraViewRepresentable: UIViewRepresentable {
     func updateUIView(_ uiView: UIViewType, context: Context) {
         if let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer {
             
-            let previewWidth = UIScreen.main.bounds.width * 0.3
+            let previewWidth = UIScreen.main.bounds.width * 0.2
             let previewHeight = previewWidth * (9 / 16)
             let padding: CGFloat = 50
             
             let previewFrame = CGRect(
-                x: UIScreen.main.bounds.width - previewWidth - padding,
+                x: UIScreen.main.bounds.width - previewWidth - padding - 100,
                 y: padding,
                 width: previewWidth,
                 height: previewHeight
@@ -57,8 +57,8 @@ struct CameraViewRepresentable: UIViewRepresentable {
             previewLayer.frame = previewFrame
             
             previewLayer.borderWidth = 2
-            previewLayer.borderColor = UIColor.red.cgColor
-            previewLayer.cornerRadius = 8
+            previewLayer.borderColor = UIColor.purple.cgColor
+            previewLayer.cornerRadius = 15
             
             if let connection = previewLayer.connection {
                 connection.videoRotationAngle = 180

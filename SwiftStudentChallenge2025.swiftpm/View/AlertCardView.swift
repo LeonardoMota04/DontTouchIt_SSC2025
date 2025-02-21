@@ -19,7 +19,6 @@ struct AlertCardView: View {
             let cardWidth = width / 4
             
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
                 VStack {
                     Text(phase.title)
                         .foregroundStyle(.white)
@@ -42,11 +41,11 @@ struct AlertCardView: View {
                 .padding()
                 
             }
-
-            .glassy()
             .frame(width: cardWidth, height: height / 1.5)
+            .glassy()
+            .scaleEffect(0.8)
             .position(
-                x: phase == .onlyOneHead || phase == .enoughLight ? cardWidth / 2 : width - cardWidth / 2,
+                x: phase == .onlyOneHead || phase == .enoughLight ? cardWidth / 1.8 : width - cardWidth / 1.8,
                  y: height / 2
              )
             .padding(.horizontal, phase == .onlyOneHead || phase == .enoughLight ? 100 : -100)
@@ -57,8 +56,13 @@ struct AlertCardView: View {
 
         }
         .ignoresSafeArea()
-        .onTapGesture {
-            withAnimation { onTap() }
+        .overlay(alignment: .bottomTrailing) {
+            // MARK: - BOTÃO
+            CustomButton(icon: "arrow.right") {
+                withAnimation { onTap() }
+            }
+            .padding(50)
+            .ignoresSafeArea()
         }
     }
 }
