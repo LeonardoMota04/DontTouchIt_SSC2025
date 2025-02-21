@@ -8,15 +8,19 @@
 import SwiftUI
 
 struct CaptionsStoryTellingBegginingView: View {
+    @EnvironmentObject private var cameraVM: CameraViewModel
+
     let phase: StoryTellingBegginigPhases
     let onFinish: () -> Void
     
     var body: some View {
         GeometryReader { geo in
-            TextWriter(text: phase.text, writingDuration: 0.05) {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            TextWriter(text: phase.text, writingDuration: 0.06) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     withAnimation(.easeInOut(duration: 3)) {
-                        onFinish()
+                        if cameraVM.currentAppState != .home {
+                            onFinish()
+                        }
                     }
                 }
             }
@@ -26,6 +30,31 @@ struct CaptionsStoryTellingBegginingView: View {
     }
 }
 
-#Preview {
-    CaptionsStoryTellingBegginingView(phase: .first) {}
-}
+//#Preview {
+//    
+//    @Previewable @State var phase: StoryTellingBegginigPhases = .third
+//    
+//    
+//    CaptionsStoryTellingBegginingView(phase: phase) {
+//        switch phase {
+//        case .first:
+//            phase =  .second
+//        case .second:
+//            
+//            phase = .third
+//
+//        case .third:
+//            phase = .fourth
+//
+//        case .fourth:
+//            phase = .fifth
+//
+//        case .fifth:
+//            phase = .sixth
+//
+//        case .sixth:
+//            phase = .first
+//        }
+//    }
+//    .id(phase)
+//}

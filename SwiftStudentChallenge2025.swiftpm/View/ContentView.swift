@@ -107,19 +107,7 @@ struct ContentView: View {
     }
 }
 
-import SwiftUI
 
-struct FreeModeView: View {
-    @State private var phase = SceneTutorialPhases.handActionCubeRightSideRotation
-
-    var body: some View {
-        SceneTutorialView(phase: phase, isFreeMode: true, onTap: {
-            
-        }, onTapPhase: { new in
-            phase = new
-        })
-    }
-}
 
 import SwiftUI
 
@@ -151,9 +139,8 @@ struct HUDView: View {
 
 
 #Preview {
-    @Previewable @StateObject var cameraVM: CameraViewModel = .init()
     ContentView()
-        .environmentObject(cameraVM)
+        .environmentObject(CameraViewModel())
 }
 
 
@@ -287,4 +274,27 @@ enum SceneTutorialPhases: CaseIterable {
             return "You can do this movement to rotate the right side of the cube"
         }
     }
+}
+
+// DEALING WITH DIFFERENT IPAD CAMERA POSITIONS
+enum CameraPositionOnRealIpad: String {
+    case top
+    case side
+}
+
+class UserIpadSchema {
+    private static let cameraPositionKey = "cameraPosition"
+
+    static func saveCameraPosition(_ position: CameraPositionOnRealIpad) {
+        UserDefaults.standard.set(position.rawValue, forKey: cameraPositionKey)
+    }
+
+    static func getCameraPosition() -> CameraPositionOnRealIpad? {
+        if let savedValue = UserDefaults.standard.string(forKey: cameraPositionKey),
+           let position = CameraPositionOnRealIpad(rawValue: savedValue) {
+            return position
+        }
+        return nil
+    }
+    
 }

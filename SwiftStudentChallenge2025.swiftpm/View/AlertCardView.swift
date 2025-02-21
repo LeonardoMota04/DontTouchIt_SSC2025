@@ -53,7 +53,6 @@ struct AlertCardView: View {
                 .degrees(phase == .onlyOneHead || phase == .enoughLight ? 45 : -45),
                 axis: (x: 0, y: 1, z: 0)
             )
-
         }
         .ignoresSafeArea()
         .overlay(alignment: .bottomTrailing) {

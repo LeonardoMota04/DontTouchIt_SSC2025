@@ -11,6 +11,7 @@ protocol CameraManagerDelegate: AnyObject {
     func cameraManager(_ manager: CameraManager, didCapture sampleBuffer: CMSampleBuffer)
 }
 
+// CAMERA MANAGER
 class CameraManager: NSObject {
     let captureSession = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
@@ -22,10 +23,10 @@ class CameraManager: NSObject {
         checkCameraPermission()
     }
     
+    // checking camera permission
     private func checkCameraPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            print("Camera access authorized")
             setupCaptureSession()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in

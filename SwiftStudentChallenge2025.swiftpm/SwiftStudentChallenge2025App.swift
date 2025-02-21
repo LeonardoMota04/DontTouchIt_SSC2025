@@ -10,12 +10,73 @@ import SwiftUI
 @main
 struct SwiftStudentChallenge2025App: App {
     @StateObject private var cameraVM: CameraViewModel = .init()
-    
+    @State private var showSelectionScreen = UserIpadSchema.getCameraPosition() == nil
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(cameraVM)
+                .overlay {
+                    if showSelectionScreen {
+                        CameraPositionSelectionView(showSelectionScreen: $showSelectionScreen)
+                            .frame(width: 400, height: 550)
+                    }
+                }
         }
     }
 }
 
+import SwiftUI
+
+struct CameraPositionSelectionView: View {
+    @Binding var showSelectionScreen: Bool
+
+    var body: some View {
+        GeometryReader { geo in
+            RoundedRectangle(cornerRadius: 15)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .glassy()
+
+            .overlay {
+                VStack {
+                    Text("Onde fica a câmera no seu iPad?")
+                        .font(.title2)
+                        .bold()
+                    
+                    VStack (spacing: 20) {
+                        
+                        // top
+                        HStack {
+                            CustomButton(icon: "ipad.gen1.landscape") {
+                                saveAndProceed(position: .top)
+                            }
+                            Text("TOP").bold()
+                        }
+                        
+                        // side
+                        HStack {
+                            CustomButton(icon: "ipad.gen1.landscape") {
+                                saveAndProceed(position: .side)
+                            }
+                            Text("SIDE").bold()
+                        }
+                        
+                    }
+                    
+                }
+                .foregroundStyle(.white.opacity(0.7))
+                .frame(width: 400, height: 200)
+            }
+
+            .ignoresSafeArea()
+        }
+    }
+
+    private func saveAndProceed(position: CameraPositionOnRealIpad) {
+         UserIpadSchema.saveCameraPosition(position)
+         showSelectionScreen = false
+     }
+}
+#Preview {
+    CameraPositionSelectionView(showSelectionScreen: .constant(true))
+}

@@ -26,21 +26,27 @@ struct SceneTutorialView: View {
     @State private var isInteractingWithTheCube: Bool = false {
         willSet {
             if newValue {
-                guard phase != .intro, phase != .headCameraTracking else { return }
-                self.isButtonVisible = false
-                startTimer() 
+                guard phase != .intro, phase != .headCameraTracking, !isFreeMode else { return }
+                
+                if !phasesWithTimerActivated.contains(phase) {
+                    self.isButtonVisible = false
+                    startTimer()
+                    phasesWithTimerActivated.insert(phase) 
+                }
             }
         }
     }
+
     @State private var previousPhases: [SceneTutorialPhases] = []
+    @State private var phasesWithTimerActivated: Set<SceneTutorialPhases> = []
     @State private var isButtonDisabled: Bool = false
     @State private var isButtonVisible: Bool = true
-    @State private var remainingTime: Int = 8 // Tempo do timer em segundos
-    @State private var timer: Timer? // Referência do temporizador
+    @State private var remainingTime: Int = 8
+    @State private var timer: Timer?
     
     private func startTimer() {
-        remainingTime = 8 // Define o tempo inicial do temporizador
-        timer?.invalidate() // Para qualquer temporizador anterior, caso exista
+        remainingTime = 8
+        timer?.invalidate()
         
         // Inicia o temporizador
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
@@ -88,18 +94,18 @@ struct SceneTutorialView: View {
                 CardView(phase: phase, geo: geo, isInteracting: isInteractingWithTheCube, isMainCard: true)
                     .onTapGesture {
                         if (previousPhases.contains(phase) || isFreeMode) {
-                            withAnimation(.bouncy) { onTap() }
-//                            return
+                            withAnimation(.bouncy) { isInteractingWithTheCube.toggle() }
                         }
                     }
                     .opacity((isFreeMode && isInteractingWithTheCube) ? 0.5 : 1)
+                    .allowsHitTesting(true)
             }
         }
         .onAppear { if isFreeMode { isInteractingWithTheCube = true } }
         .ignoresSafeArea()
         .overlay(alignment: .bottomTrailing) {
             // MARK: - Circular Progress
-            if !isButtonVisible && !isFreeMode {
+            if !isButtonVisible {
                 CircularProgressView(progress: CGFloat(remainingTime) / 8.0)
                     .frame(width: 50, height: 50)
                     .padding(50)
@@ -150,8 +156,6 @@ struct SceneTutorialView: View {
         }
     }
 }
-
-
 
 
 
@@ -243,7 +247,7 @@ struct CardView: View {
 //                
 //            }
 
-            SceneTutorialView(phase: phase) {
+            SceneTutorialView(phase: phase, isFreeMode: true) {
                 switch phase {
                 case .intro:
                     phase = .headCameraTracking
