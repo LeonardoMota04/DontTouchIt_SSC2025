@@ -182,16 +182,14 @@ class CubeViewController: UIViewController {
         
         let sensitivity: Float = 0.015
         let maxRotation: Float = .pi / 4  // 45 degrees for normal movement rotation
-        
-        let maxRotationXDown: Float = .pi / 12  // 15 degrees to avoid
-        
+                
         // horizontal offset
         let horizontalOffset = Float(distance.horizontal - 25) * sensitivity
         let targetRotationY = clamp(value: horizontalOffset, min: -maxRotation, max: maxRotation)
         
-        // vertical offset com limite para o chão (somente para baixo)
+        // vertical offset
         let verticalOffset = Float(distance.vertical) * sensitivity
-        let targetRotationX = clamp(value: verticalOffset, min: -maxRotationXDown, max: maxRotation)
+        let targetRotationX = clamp(value: verticalOffset, min: -maxRotation, max: maxRotation)
 
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 0.1
@@ -203,7 +201,7 @@ class CubeViewController: UIViewController {
         return Swift.max(min, Swift.min(max, value))
     }
 
-    // ROTATES THE ENTIRE CUBE
+    // ROTATES THE ENTIRE CUBE (camera controll)
     func updateCameraRotation(based onAction: HandAction) {
         guard case .rotateCamera(let rotationType) = onAction else { return }
         guard !cameraHandControllLock else { return }
@@ -382,7 +380,7 @@ class CubeViewController: UIViewController {
             }
 
         // MARK: ALERTS CARDS
-        case .alertsCards(let alertsCardsPhases):
+        case .alertsCards(_):
             return
 
         // MARK: SCENE TUTORIAL
