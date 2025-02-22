@@ -140,10 +140,10 @@ class CubeViewController: UIViewController {
         let wallHeight: Float = 20
         let wallThickness: Float = 0.2
         let floorHeight: Float = 0.2
-        var roomYOffset: Float = 8
+        let roomYOffset: Float = 6
         
-        let wallTexture = UIImage(named: "bgWalls")
-        let floorCeilingTexture = UIImage(named: "bgGround")
+        let wallTexture = UIImage(named: "bgWalls") // WALLS TEXTURE
+        let floorCeilingTexture = UIImage(named: "bgGround") // GROUND AND CEILING TEXTURE
 
         func createWall(width: Float, height: Float, depth: Float, position: SCNVector3, texture: UIImage?) -> SCNNode {
             let wallGeometry = SCNBox(width: CGFloat(width), height: CGFloat(height), length: CGFloat(depth), chamferRadius: 0)
