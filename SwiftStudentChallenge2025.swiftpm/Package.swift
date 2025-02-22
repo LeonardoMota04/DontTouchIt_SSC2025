@@ -44,6 +44,8 @@ let package = Package(
                 .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 3 copy.mlmodelc"),
                 .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 4.mlmodelc"),
                 .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 5.mlmodelc"),
+                .copy("Resources/SwiftStudentChallenge2025_HandActionClassifier 16.mlmodelc"),
+                .copy("Resources/LeoSSC2025.mlmodelc"),
                 .process("Resources/Assets.xcassets")
             ]
         )

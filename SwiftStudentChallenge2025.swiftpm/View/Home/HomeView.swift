@@ -23,20 +23,24 @@ struct HomeView: View {
     // ANIMATION
     @State private var itemsOffset: CGFloat = 400
     
-    
+    private let gradientColors = [
+        Color(hex: "BD80D4"),
+        Color(hex: "62436E"),
+        Color(hex: "A973BE")
+    ]
+
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
             let height = geo.size.height
             
             VStack {
-                Text("DO NOT \n\(Text("TOUCH").foregroundStyle(.purple).bold()) \nIT")
-                    .font(.system(size: 80, weight: .thin))
-                    .foregroundStyle(.white)
-                    .offset(y: -itemsOffset)
-                
+                // TITLE
+                TitleView(itemsOffset: $itemsOffset)
+
                 Spacer()
                 
+                // BOTTOM TEXT
                 VStack {
                     Text("Tilt your head")
                         .fontWeight(.bold)
@@ -52,13 +56,15 @@ struct HomeView: View {
                 .offset(y: itemsOffset)
                 
             }
-            .padding(.vertical, 60)
+            .ignoresSafeArea()
+            .padding(.vertical, 50)
             .frame(width: width, height: height)
             .overlay {
                 // PURPLE SIDES
                 ZStack {
-                    // Purple ellipses
+                    // PURPLE ELLIPSES
                     HStack {
+                        // LEFT
                         Ellipse()
                             .glassy(shape: Ellipse())
                             .frame(width: width / 3, height: height * 1.5)
@@ -66,7 +72,7 @@ struct HomeView: View {
                             .opacity(isTiltingHeadLEFT ? 1 : 0)
                         
                         Spacer()
-                        
+                        // RIGHT
                         Ellipse()
                             .glassy(shape: Ellipse())
                             .frame(width: width / 3, height: height * 1.5)
@@ -74,7 +80,7 @@ struct HomeView: View {
                             .opacity(isTiltingHeadRIGHT ? 1 : 0)
                         
                     }
-                    // Progress circles
+                    // PROGRESS CIRCLES (5secs)
                     HStack {
                         if isTiltingHeadLEFT {
                             CircularProgressView(progress: progress)
@@ -92,6 +98,7 @@ struct HomeView: View {
                 }
                 .animation(.easeOut, value: isTiltingHeadLEFT || isTiltingHeadRIGHT)
             }
+            // ON CHANGE OF HEAD DISTANCE FROM CENTER
             .onChange(of: cameraVM.distanceFromCenter) { _, newValue in
                 guard let newValue = newValue else { return }
                 
@@ -112,6 +119,7 @@ struct HomeView: View {
             }
         }
         .ignoresSafeArea()
+        // ON APPEAR ANIMATION
         .onAppear {
             withAnimation(Animation.bouncy(duration: 1.5).delay(0.5)) {
                 itemsOffset = 0
@@ -119,6 +127,7 @@ struct HomeView: View {
         }
     }
     
+    // MARK: - FUNCTIONS
     private func startLoading() {
         loadingTimer?.invalidate()
         progress = 0
@@ -147,7 +156,27 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Circular Progress View
+// MARK: TITLE VIEW
+struct TitleView: View {
+    @Binding var itemsOffset: CGFloat
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: -15) {
+            Text("DON'T")
+            Text("TOUCH")
+                .foregroundStyle(.purple)
+                .bold()
+            Text("IT")
+        }
+        .font(.system(size: 80, weight: .light))
+        .foregroundStyle(.white)
+        .opacity(0.8)
+        .offset(y: -itemsOffset)
+
+    }
+}
+
+// MARK: -CIRCLE Progress View
 struct CircularProgressView: View {
     var progress: CGFloat
     

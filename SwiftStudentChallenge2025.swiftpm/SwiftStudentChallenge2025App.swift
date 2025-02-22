@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct SwiftStudentChallenge2025App: App {
     @StateObject private var cameraVM: CameraViewModel = .init()
-    @State private var showSelectionScreen = UserIpadSchema.getCameraPosition() == nil
+    @State private var showSelectionScreen = UserIpadSchemaManager.getCameraPosition() == nil
 
     var body: some Scene {
         WindowGroup {
@@ -18,8 +18,7 @@ struct SwiftStudentChallenge2025App: App {
                 .environmentObject(cameraVM)
                 .overlay {
                     if showSelectionScreen {
-                        CameraPositionSelectionView(showSelectionScreen: $showSelectionScreen)
-                            .frame(width: 400, height: 550)
+                        CardInfoView(showInfoView: $showSelectionScreen)
                     }
                 }
         }
@@ -73,7 +72,7 @@ struct CameraPositionSelectionView: View {
     }
 
     private func saveAndProceed(position: CameraPositionOnRealIpad) {
-         UserIpadSchema.saveCameraPosition(position)
+         UserIpadSchemaManager.saveCameraPosition(position)
          showSelectionScreen = false
      }
 }

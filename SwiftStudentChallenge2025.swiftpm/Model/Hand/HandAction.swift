@@ -73,14 +73,33 @@ enum HandAction: Equatable {
     }
 }
 
+//extension HandAction {
+//    init?(predictionLabel: String) {
+//        switch predictionLabel {
+//        case "NONE":
+//            self = .none
+//        case "RIGHT-clockwise":
+//            self = .right(.clockwise)
+//        case "CAMERA-clockwise":
+//            self = .rotateCamera(.counterclockwise)
+//        case "CAMERA-counterclockwise":
+//            self = .rotateCamera(.clockwise)
+//        default:
+//            return nil
+//        }
+//    }
+//}
+
 extension HandAction {
     init?(predictionLabel: String) {
         switch predictionLabel {
-        case "NONE":
+        case "none":
             self = .none
-        case "RIGHT-clockwise":
+        case "other":
+            self = .none
+        case "right_clock":
             self = .right(.clockwise)
-        case "CAMERA-clockwise":
+        case "camera_clock":
             self = .rotateCamera(.counterclockwise)
         case "CAMERA-counterclockwise":
             self = .rotateCamera(.clockwise)

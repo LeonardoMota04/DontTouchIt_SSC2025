@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 
+// camera preview to swiftui
 struct CameraViewRepresentable: UIViewRepresentable {
     let captureSession: AVCaptureSession
     
@@ -65,17 +66,6 @@ struct CameraViewRepresentable: UIViewRepresentable {
             }
         }
     }
-    
 }
 
 
-// UIViewController Representable to bring the View Controller to SwiftUI
-struct CubeView: UIViewControllerRepresentable {
-    var viewController: CubeViewController
-
-    func makeUIViewController(context: Context) -> CubeViewController {
-        return viewController
-    }
-
-    func updateUIViewController(_ uiViewController: CubeViewController, context: Context) {}
-}

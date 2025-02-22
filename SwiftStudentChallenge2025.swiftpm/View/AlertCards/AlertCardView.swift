@@ -18,30 +18,28 @@ struct AlertCardView: View {
             let height = geo.size.height
             let cardWidth = width / 4
             
-            ZStack {
-                VStack {
+            VStack {
+                phase.image
+                    .resizable()
+                    .scaledToFit()
+                    .padding([.top, .horizontal])
+                    .frame(maxHeight: .infinity)
+                                
+                VStack (alignment: .leading, spacing: 10) {
                     Text(phase.title)
+                        .frame(maxHeight: .infinity)
                         .foregroundStyle(.white)
-                        .font(.largeTitle)
+                        .font(.system(size: 45))
                         .fontWeight(.semibold)
                     
-                    Spacer()
-                    
-                    phase.image
-                        .resizable()
-                        .scaledToFit()
-                    
-                    Spacer()
-
                     Text(phase.description)
                         .foregroundStyle(.white)
                         .font(.headline)
                         .padding(.bottom)
                 }
-                .padding()
-                
+                .padding(15)
             }
-            .frame(width: cardWidth, height: height / 1.5)
+            .frame(width: cardWidth, height: height / 1.6)
             .glassy()
             .scaleEffect(0.8)
             .position(
@@ -75,7 +73,7 @@ struct AlertCardView: View {
         var body: some View {
             VStack {
                 AlertCardView(phase: phase) {
-                    withAnimation { // Aplica a animação na troca do estado
+                    withAnimation {
                         switch phase {
                         case .onlyOneHead:
                             phase = .distanceToTheScreen

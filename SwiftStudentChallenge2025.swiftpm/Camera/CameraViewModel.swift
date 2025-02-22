@@ -18,7 +18,7 @@ class CameraViewModel: ObservableObject {
     @Published var predictedAction: HandAction?
     @Published var headInclination: HeadInclination?
     @Published var distanceFromCenter: HeadDistanceFromCenter?
-    @Published var currentAppState: AppState = .sceneTutorial(.intro) {
+    @Published var currentAppState: AppState = .home {
         didSet { viewController.updateAppState(currentAppState) }
     }
 

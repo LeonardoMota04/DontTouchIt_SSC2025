@@ -25,8 +25,8 @@ struct CustomButton: View {
                         .font(.largeTitle)
                         .shadow(radius: 5)
                 }
-                .glassy() // Aplica o efeito "glassy"
+                .glassy()
         }
-        .buttonStyle(PlainButtonStyle()) // Remove o estilo padrão do botão
+        .buttonStyle(PlainButtonStyle())
     }
 }

@@ -21,7 +21,7 @@ class HeadDirectionDetector {
         let horizontalOffset = nose.x - eyeCenterX
         let verticalOffset = nose.y - eyeCenterY
 
-        let horizontalLookPercentage = -(horizontalOffset / faceBoundingBox.width) // aumentar a tolerância
+        let horizontalLookPercentage = -(horizontalOffset / faceBoundingBox.width)
         let verticalLookPercentage = (verticalOffset / faceBoundingBox.height)
 
         return HeadInclination(horizontal: horizontalLookPercentage, vertical: verticalLookPercentage)
@@ -32,7 +32,7 @@ class HeadDirectionDetector {
         rightEye: CGPoint,
         screenSize: CGSize
     ) -> HeadDistanceFromCenter {
-        let cameraPositionOnIpad = UserIpadSchema.getCameraPosition() // gets information about the camera position on the iPad
+        let cameraPositionOnIpad = UserIpadSchemaManager.getCameraPosition() // gets information about the camera position on the iPad
         
         // EYES CENTRAL POINT
         let eyeCenterX = (leftEye.x + rightEye.x) / 2

@@ -41,7 +41,6 @@ class CubeViewController: UIViewController {
     // MARK: - VARIABLES
     // camera
     var currentAngleY: Float = 0
-    var currentAngleX: Float = 0
     var isUserControllingCamera = false
 
     // screen
@@ -59,15 +58,6 @@ class CubeViewController: UIViewController {
     var cameraHeadControllLock: Bool = true
     var cameraHandControllLock: Bool = true
     var cubeFaceRotationLock: Bool = true
-    var roomYOffset: Float = 6
-    
-    
-    var beganPanHitResult: SCNHitTestResult!
-    var beganPanNode: SCNNode!
-    var rotationAxis:SCNVector3!
-
-    var edgeDistance975 : Float = 0.975
-    var tolerance25: Float = 0.025
     var isRotating = false
     
     // MARK: - DIDLOAD
@@ -100,27 +90,26 @@ class CubeViewController: UIViewController {
     }
     
     func addLighting() {
-        // 💡 Luz principal (lâmpada no teto)
+        // ceiling
         let ceilingLightNode = SCNNode()
         let ceilingLight = SCNLight()
         
-        ceilingLight.type = .omni // Luz que se espalha em todas as direções
+        ceilingLight.type = .omni
         ceilingLight.color = UIColor.white
-        ceilingLight.intensity = 800 // Iluminação não muito forte
+        ceilingLight.intensity = 800
         ceilingLight.attenuationStartDistance = 5
         ceilingLight.attenuationEndDistance = 50
         
         ceilingLightNode.light = ceilingLight
-        ceilingLightNode.position = SCNVector3(0, 10, 0) // No teto
+        ceilingLightNode.position = SCNVector3(0, 10, 0)
         
         rootNode.addChildNode(ceilingLightNode)
 
-        // 🌫️ Luz ambiente fraca (para evitar escuridão total nas sombras)
         let ambientLightNode = SCNNode()
         let ambientLight = SCNLight()
         
         ambientLight.type = .ambient
-        ambientLight.color = UIColor.darkGray // Luz fraca, mas suficiente para as sombras não ficarem 100% escuras
+        ambientLight.color = UIColor.darkGray
         
         ambientLightNode.light = ambientLight
         rootNode.addChildNode(ambientLightNode)
@@ -151,10 +140,10 @@ class CubeViewController: UIViewController {
         let wallHeight: Float = 20
         let wallThickness: Float = 0.2
         let floorHeight: Float = 0.2
-        var roomYOffset: Float = roomYOffset
+        var roomYOffset: Float = 8
         
-        let wallTexture = UIImage(named: "bgWalls") // Textura das paredes
-        let floorCeilingTexture = UIImage(named: "concrete") // Textura do chão/teto
+        let wallTexture = UIImage(named: "bgWalls")
+        let floorCeilingTexture = UIImage(named: "bgGround")
 
         func createWall(width: Float, height: Float, depth: Float, position: SCNVector3, texture: UIImage?) -> SCNNode {
             let wallGeometry = SCNBox(width: CGFloat(width), height: CGFloat(height), length: CGFloat(depth), chamferRadius: 0)
@@ -170,7 +159,6 @@ class CubeViewController: UIViewController {
             return wallNode
         }
 
-        // Criando os elementos da sala com diferentes texturas
         let leftWall = createWall(width: wallThickness, height: wallHeight, depth: floorSize, position: SCNVector3(-floorSize / 2, roomYOffset, 0), texture: wallTexture)
         let rightWall = createWall(width: wallThickness, height: wallHeight, depth: floorSize, position: SCNVector3(floorSize / 2, roomYOffset, 0), texture: wallTexture)
         let backWall = createWall(width: floorSize, height: wallHeight, depth: wallThickness, position: SCNVector3(0, roomYOffset, -floorSize / 2), texture: wallTexture)
@@ -186,7 +174,6 @@ class CubeViewController: UIViewController {
         rootNode.addChildNode(floor)
         rootNode.addChildNode(ceiling)
     }
-
   
     
     // MARK: - CAMERA HEAD CONTROLL
@@ -194,9 +181,9 @@ class CubeViewController: UIViewController {
         guard let distance = headDistanceFromCenter, !isUserControllingCamera, !cameraHeadControllLock else { return }
         
         let sensitivity: Float = 0.015
-        let maxRotation: Float = .pi / 4  // 45 degrees para os movimentos de rotação normal
+        let maxRotation: Float = .pi / 4  // 45 degrees for normal movement rotation
         
-        let maxRotationXDown: Float = .pi / 12  // 15 degrees para evitar atravessar o chão
+        let maxRotationXDown: Float = .pi / 12  // 15 degrees to avoid
         
         // horizontal offset
         let horizontalOffset = Float(distance.horizontal - 25) * sensitivity
@@ -362,42 +349,31 @@ class CubeViewController: UIViewController {
             }
 
             self.isRotating = false
-            self.beganPanNode = nil
         }
     }
 
+    // MARK: - APPSTATE CHANGES
     func updateAppState(_ state: AppState) {
         switch state {
+        // MARK: HOME
         case .home:
-            // Voltar para a posição inicial da câmera e o pivot para -5
             adjustCameraPositionToHome()
-            // Ajustar o roomYOffset para 6 na home
-            adjustRoomYOffsetToHome()
-            // Travar todos os controles
             cameraHeadControllLock = true
             cameraHandControllLock = true
             cubeFaceRotationLock = true
 
+        // MARK: STORYTELLING BEGGINING
         case .storyTellingBegginig(let storyTellingBegginigPhases):
             switch storyTellingBegginigPhases {
             case .first:
-                // Anima a câmera para o pivot -3
                 adjustCameraPositionPhaseFirst()
-                // Ajusta o roomYOffset para 8 na fase primeira
-                adjustRoomYOffsetToFirstPhase()
 
-                // Inicia a animação de rotação do Rubik's Cube
                 animateRubiksCubeRotation(startAngle: 0, numberOfRotations: 20, duration: 15, isDecelerating: false) {
-                    // A rotação começou devagar e acelerou, agora é o ponto mais rápido da animação
                     self.finalRotationAngle = self.rubiksCube.rotation.w
                 }
 
             case .fourth:
-                // Reverte a animação para o cubo desacelerando
-                animateRubiksCubeRotation(startAngle: finalRotationAngle, numberOfRotations: 2, duration: 7, isDecelerating: true) {
-                    // Finaliza a animação
-                }
-                // Anima a câmera para o pivot -5
+                animateRubiksCubeRotation(startAngle: finalRotationAngle, numberOfRotations: 2, duration: 7, isDecelerating: true) {}
                 adjustCameraPositionPhaseFourth()
                 return
 
@@ -405,10 +381,11 @@ class CubeViewController: UIViewController {
                 break
             }
 
+        // MARK: ALERTS CARDS
         case .alertsCards(let alertsCardsPhases):
-            // Aqui você pode adicionar lógica específica para esta fase, se necessário
             return
 
+        // MARK: SCENE TUTORIAL
         case .sceneTutorial(let sceneTutorialPhases):
             switch sceneTutorialPhases {
             case .intro:
@@ -416,143 +393,71 @@ class CubeViewController: UIViewController {
                 return
 
             case .headCameraTracking:
-                // Cabeça liberada para controle
+                // ALLOW CAMERA HEAD CONTROLL
                 cameraHeadControllLock = false
                 return
 
             case .handActionCameraRotation:
-                // Permitir rotação total do cubo com a mão
+                // ALLOW CAMERA CONTROLL ROTTATION
                 cameraHandControllLock = false
                 return
 
             case .handActionCubeRightSideRotation:
-                // Permitir rotação de um lado do cubo
+                // AALOW SIDEROTATION
                 cubeFaceRotationLock = false
             }
 
         case .freeMode:
-            // Libera todos os controles
+            // FREE ALL CONTROLLS
             cameraHeadControllLock = false
             cameraHandControllLock = false
             cubeFaceRotationLock = false
         }
     }
 
-
+    // MARK: ADJUST CAMERA POSITION
     func adjustCameraPositionToHome() {
-        // Volta para a posição inicial e pivot em -5
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 2
         SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-        // Restaura a posição e pivot da câmera para o inicial
         self.cameraNode.position = SCNVector3Make(0, 0, 0)
         self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -5)
         self.cameraNode.eulerAngles = SCNVector3(0, 0, 0)
-        
-        //self.cameraIsMoving = true
-
-        SCNTransaction.completionBlock = { [self] in
-            //self.cameraIsMoving = false
-        }
         SCNTransaction.commit()
     }
 
     func adjustCameraPositionPhaseFirst() {
-        // Animação para a fase "first" do storytelling (pivot para -3)
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 3
         SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
         self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -3)
-        
-        //self.cameraIsMoving = true
-
-        SCNTransaction.completionBlock = { [self] in
-            //self.cameraIsMoving = false
-        }
         SCNTransaction.commit()
     }
 
     func adjustCameraPositionPhaseFourth() {
-        // Animação para a fase "fourth" do storytelling (pivot volta para -5)
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 3
         SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
         self.cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -5)
-        
-        //self.cameraIsMoving = true
-
-        SCNTransaction.completionBlock = { [self] in
-            //self.cameraIsMoving = false
-        }
-        SCNTransaction.commit()
-    }
-
-    func adjustRoomYOffsetToHome() {
-        // Ajuste do roomYOffset para 6 na home
-        SCNTransaction.begin()
-        SCNTransaction.animationDuration = 2
-        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-        // Ajustando o roomYOffset para 6
-        self.roomYOffset = 6
-
-        SCNTransaction.completionBlock = { [self] in
-            self.roomYOffset = 6
-        }
-        SCNTransaction.commit()
-    }
-
-    func adjustRoomYOffsetToFirstPhase() {
-        // Ajuste do roomYOffset para 8 na primeira fase do storytelling
-        SCNTransaction.begin()
-        SCNTransaction.animationDuration = 3
-        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-        // Ajustando o roomYOffset para 8
-        self.roomYOffset = 8
-
-        SCNTransaction.completionBlock = { [self] in
-            self.roomYOffset = 8
-        }
         SCNTransaction.commit()
     }
     
-    // Função para animar o Rubik's Cube no eixo horizontal
-//    func animateRubiksCubeRotation(startAngle: Float, endAngle: Float, duration: TimeInterval, completion: @escaping () -> Void) {
-//        SCNTransaction.begin()
-//        SCNTransaction.animationDuration = duration
-//        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut) // Inicia devagar e depois acelera
-//
-//        // Aplica a rotação no eixo X do cubo (rotação horizontal)
-//        rubiksCube.rotation = SCNVector4(1, 0, 0, startAngle)
-//        rubiksCube.rotation = SCNVector4(1, 0, 0, endAngle)
-//
-//        SCNTransaction.completionBlock = completion
-//        SCNTransaction.commit()
-//    }
-    
-    var finalRotationAngle: Float = 0 // Variável para armazenar a rotação final
+    // MARK: CUBE ROTATION ANIMATION
+    var finalRotationAngle: Float = 0
 
     func animateRubiksCubeRotation(startAngle: Float, numberOfRotations: Int, duration: TimeInterval, isDecelerating: Bool, completion: @escaping () -> Void) {
-        let endAngle = Float(numberOfRotations) * .pi * 2 // Múltiplas rotações
-        let angleDifference = endAngle - startAngle // Diferença angular
+        let endAngle = Float(numberOfRotations) * .pi * 2
+        let angleDifference = endAngle - startAngle
         
-        // A ação de rotação suave
         let rotateAction = SCNAction.rotate(by: CGFloat(angleDifference), around: SCNVector3(0, 1, 0), duration: duration)
         
-        // Determina a função de temporização (aceleração ou desaceleração)
         rotateAction.timingMode = isDecelerating ? .easeOut : .easeIn
 
-        // Aplica a rotação no cubo
         rubiksCube.runAction(rotateAction) {
-            // Chama o completion após o término da animação
             completion()
         }
     }
-
-
-
 }

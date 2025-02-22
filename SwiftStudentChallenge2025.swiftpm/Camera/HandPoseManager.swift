@@ -11,10 +11,10 @@ import UIKit
 
 class HandPoseManager {
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
-    private let handActionModel = try? SwiftStudentChallenge2025_HandActionClassifier_5(configuration: MLModelConfiguration())
-    private let confidenceThreshold: Float = 0.8
+    private let handActionModel = try? LeoSSC2025(configuration: MLModelConfiguration())
+    private let confidenceThreshold: Float = 0.9
     private var queue: [MLMultiArray] = []
-    private let queueSize = 15
+    private let queueSize = 30
     
     var onPredictionUpdate: ((HandAction) -> Void)?
     
@@ -25,36 +25,38 @@ class HandPoseManager {
         do {
             try requestHandler.perform([handPoseRequest])
             
-//            if handPoseRequest.results?.isEmpty ?? true {
-//                DispatchQueue.main.async {
-//                    self.onPredictionUpdate?(.none)
-//                }
-//            } else {
+            if handPoseRequest.results?.isEmpty ?? true {
+                DispatchQueue.main.async {
+                    self.onPredictionUpdate?(.none)
+                }
+            } else {
                 if let results = handPoseRequest.results {
                     for observation in results {
                         processObservation(observation)
                     }
                 }
-            //}
+            }
         } catch {
             print("Error processing hand pose: \(error)")
         }
     }
     
+    // processing hand results
     private func processObservation(_ observation: VNHumanHandPoseObservation) {
         guard let multiArray = try? observation.keypointsMultiArray() else { return }
         queue.append(multiArray)
         queue = Array(queue.suffix(queueSize))
         
+        // 30 prediction window size
         if queue.count == queueSize {
             do {
                 let concatenated = MLMultiArray(concatenating: queue, axis: 0, dataType: .float32)
                 if let prediction = try handActionModel?.prediction(poses: concatenated),
                    let confidence = prediction.labelProbabilities[prediction.label],
-                   confidence > Double(confidenceThreshold) {
+                   confidence > Double(confidenceThreshold) { // confidence
                     DispatchQueue.main.async {
                         if let handRotation = HandAction(predictionLabel: prediction.label) {
-                            self.onPredictionUpdate?(handRotation)
+                            self.onPredictionUpdate?(handRotation) // sends handaction result
                         }
                     }
                 }
