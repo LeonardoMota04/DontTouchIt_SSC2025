@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct HUDView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
@@ -49,24 +50,15 @@ struct HUDView: View {
     }
 }
 
-#Preview {
-    HUDView {
-        
-    } onCameraTap: {
-        
-    } onInfoTap: {
-        
-    }
-    .environmentObject(CameraViewModel())
-
-}
-
 
 // CARD INFO VIEW
 struct CardInfoView: View {
+    @EnvironmentObject private var cameraVM: CameraViewModel
+
     @State private var itemsOffset: CGFloat = 300
-    @Binding var showInfoView: Bool
     @State private var selectedPosition: CameraPositionOnRealIpad?
+    
+    @Binding var showInfoView: Bool
 
     var body: some View {
         HStack(alignment: .top) {
@@ -79,6 +71,12 @@ struct CardInfoView: View {
             VStack(alignment: .trailing) {
                 Text("It is strongly recommended to be in a well-lit place.")
                 Text("All image assets were made by me.")
+                
+                Text("Please turn your device to the left as in the picture")
+                Image("landscape_info")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 70, height: 70)
             }
             .foregroundStyle(.white)
             .font(.body)
@@ -97,10 +95,12 @@ struct CardInfoView: View {
                 }
             }
         }
+        
         // X BUTTON
         .overlay(alignment: .topTrailing) {
             CustomButton(icon: "xmark") {
                 withAnimation { showInfoView = false }
+                cameraVM.checkCameraPermission()
             }
             .padding([.top, .trailing], -40)
         }
@@ -145,9 +145,9 @@ struct CardInfoView: View {
                     }
                 }
             }
-            .frame(width: 300)
             .foregroundStyle(.white.opacity(0.8))
-            .padding(50)
+            .padding(.trailing, 50)
+            .padding(.bottom, 30)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background {
@@ -155,13 +155,12 @@ struct CardInfoView: View {
         }
     }
 
+    // userdefaults info save
     private func saveAndProceed(position: CameraPositionOnRealIpad) {
         selectedPosition = position
         UserIpadSchemaManager.saveCameraPosition(position)
     }
 }
-
-
 
 #Preview {
     CardInfoView(showInfoView: .constant(true))

@@ -29,32 +29,3 @@ struct CaptionsStoryTellingBegginingView: View {
         }
     }
 }
-
-//#Preview {
-//    
-//    @Previewable @State var phase: StoryTellingBegginigPhases = .third
-//    
-//    
-//    CaptionsStoryTellingBegginingView(phase: phase) {
-//        switch phase {
-//        case .first:
-//            phase =  .second
-//        case .second:
-//            
-//            phase = .third
-//
-//        case .third:
-//            phase = .fourth
-//
-//        case .fourth:
-//            phase = .fifth
-//
-//        case .fifth:
-//            phase = .sixth
-//
-//        case .sixth:
-//            phase = .first
-//        }
-//    }
-//    .id(phase)
-//}

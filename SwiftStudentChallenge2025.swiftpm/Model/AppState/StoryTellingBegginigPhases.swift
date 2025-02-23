@@ -18,17 +18,17 @@ enum StoryTellingBegginigPhases {
     var text: String {
         switch self {
         case .first:
-            return "O mundo está mudando... Cada vez mais próximo, mais conectado..."
+            return "The world is changing... Closer than ever, more connected..."
         case .second:
-            return "Tudo é muito rápido. A tecnologia avança. A sociedade evolui."
+            return "Everything moves fast. Technology advances. Society evolves."
         case .third:
-            return "Mas, às vezes, no meio de tanta correria... estamos longe do que é real."
+            return "But sometimes, in the middle of all the rush... we are far from what is real."
         case .fourth:
-            return "E se não precisássemos dessa distância?"
+            return "What if we didn’t need this distance?"
         case .fifth:
-            return "Não precisamos. Já vivemos na era dos gestos, do toque mínimo, da presença máxima."
+            return "We don’t. We already live in the era of gestures, minimal touch, maximum presence."
         case .sixth:
-            return "E se pudéssemos unir o real e o virtual?"
+            return "What if we could merge the real and the virtual?"
         }
     }
     

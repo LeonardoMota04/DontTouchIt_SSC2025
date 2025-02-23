@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// tipo de rotação: horária ou anti-horária
 enum RotationType {
     case clockwise
     case counterclockwise

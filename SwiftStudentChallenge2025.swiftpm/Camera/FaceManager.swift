@@ -9,24 +9,6 @@ import Vision
 import UIKit
 
 class HeadDirectionDetector {
-    static func calculateInclination(
-        leftEye: CGPoint,
-        rightEye: CGPoint,
-        nose: CGPoint,
-        faceBoundingBox: CGRect
-    ) -> HeadInclination {
-        let eyeCenterX = (leftEye.x + rightEye.x) / 2
-        let eyeCenterY = (leftEye.y + rightEye.y) / 2
-
-        let horizontalOffset = nose.x - eyeCenterX
-        let verticalOffset = nose.y - eyeCenterY
-
-        let horizontalLookPercentage = -(horizontalOffset / faceBoundingBox.width)
-        let verticalLookPercentage = (verticalOffset / faceBoundingBox.height)
-
-        return HeadInclination(horizontal: horizontalLookPercentage, vertical: verticalLookPercentage)
-    }
-    
     static func calculateDistanceFromCenter(
         leftEye: CGPoint,
         rightEye: CGPoint,
@@ -67,11 +49,11 @@ class HeadDirectionDetector {
 class FaceManager {
     private let faceLandmarksRequest = VNDetectFaceLandmarksRequest()
     
-    var onFaceDataUpdate: ((HeadInclination, HeadDistanceFromCenter) -> Void)?
+    var onFaceDataUpdate: ((HeadDistanceFromCenter) -> Void)?
 
     func processFace(from sampleBuffer: CMSampleBuffer) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        // TODO: - LIDAR COM ORIENTACAO DO IPAD
+
         let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .down)
 
         do {
@@ -90,21 +72,11 @@ class FaceManager {
         // landmarks
         guard let landmarks = observation.landmarks else { return }
         guard let leftEye = landmarks.leftEye?.normalizedPoints.first,
-              let rightEye = landmarks.rightEye?.normalizedPoints.first,
-              let nose = landmarks.nose?.normalizedPoints.first else { return }
+              let rightEye = landmarks.rightEye?.normalizedPoints.first else { return }
 
         let faceBoundingBox = observation.boundingBox
         let leftEyePoint = convertLandmarkPoint(leftEye, boundingBox: faceBoundingBox)
         let rightEyePoint = convertLandmarkPoint(rightEye, boundingBox: faceBoundingBox)
-        let nosePoint = convertLandmarkPoint(nose, boundingBox: faceBoundingBox)
-
-        // INCLINATION and DISTANCE FROM CENTER
-        let inclination = HeadDirectionDetector.calculateInclination(
-            leftEye: leftEyePoint,
-            rightEye: rightEyePoint,
-            nose: nosePoint,
-            faceBoundingBox: faceBoundingBox
-        )
         
         let distance = HeadDirectionDetector.calculateDistanceFromCenter(
             leftEye: leftEyePoint,
@@ -113,7 +85,7 @@ class FaceManager {
         )
 
         DispatchQueue.main.async {
-            self.onFaceDataUpdate?(inclination, distance)
+            self.onFaceDataUpdate?(distance)
         }
     }
     
@@ -122,22 +94,6 @@ class FaceManager {
             x: point.x * boundingBox.width * UIScreen.main.bounds.width + boundingBox.origin.x * UIScreen.main.bounds.width,
             y: point.y * boundingBox.height * UIScreen.main.bounds.height + boundingBox.origin.y * UIScreen.main.bounds.height
         )
-    }
-    
-    // getting ipad orientation
-    func currentOrientation() -> CGImagePropertyOrientation {
-        let orientation = UIDevice.current.orientation
-        
-        switch orientation {
-        case .landscapeLeft:
-            return .right
-        case .landscapeRight:
-            return .left
-        case .portraitUpsideDown:
-            return .up
-        default:
-            return .down
-        }
     }
 }
 

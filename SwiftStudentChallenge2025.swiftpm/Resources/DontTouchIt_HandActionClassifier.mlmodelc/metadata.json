@@ -1,0 +1,86 @@
+[
+  {
+    "metadataOutputVersion" : "3.0",
+    "storagePrecision" : "Float32",
+    "outputSchema" : [
+      {
+        "isOptional" : "0",
+        "keyType" : "String",
+        "formattedType" : "Dictionary (String → Double)",
+        "type" : "Dictionary",
+        "name" : "labelProbabilities",
+        "shortDescription" : "A dictionary of labels and the corresponding confidences."
+      },
+      {
+        "isOptional" : "0",
+        "formattedType" : "String",
+        "type" : "String",
+        "name" : "label",
+        "shortDescription" : "Most likely hand action category."
+      }
+    ],
+    "modelParameters" : [
+
+    ],
+    "author" : "Leonardo Mota",
+    "specificationVersion" : 4,
+    "computePrecision" : "Float16",
+    "isUpdatable" : "0",
+    "stateSchema" : [
+
+    ],
+    "availability" : {
+      "macOS" : "10.15",
+      "tvOS" : "13.0",
+      "visionOS" : "1.0",
+      "watchOS" : "6.0",
+      "iOS" : "13.0",
+      "macCatalyst" : "13.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_neuralNetworkClassifier"
+    },
+    "inputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 30 × 3 × 21)",
+        "shortDescription" : "A sequence of hand poses to classify. Its multiarray encoding uses the first dimension to index time over 30 frames. The second dimension indexes x, y, and confidence of hand pose keypoint locations. The last dimension indexes the keypoint type, ordered as wrist, thumbCMC, thumbMP, thumbIP, thumbTip, indexMCP, indexPIP, indexDIP, indexTip, middleMCP, middlePIP, middleDIP, middleTip, ringMCP, ringPIP, ringDIP, ringTip, littleMCP, littlePIP, littleDIP, littleTip.",
+        "shape" : "[30, 3, 21]",
+        "name" : "poses",
+        "type" : "MultiArray"
+      }
+    ],
+    "classLabels" : [
+      "camera_counter",
+      "camera_clock",
+      "other",
+      "left_counter",
+      "none",
+      "right_clock"
+    ],
+    "generatedClassName" : "DontTouchIt_HandActionClassifier",
+    "userDefinedMetadata" : {
+      "com.apple.createml.app.tag" : "150.3",
+      "Prediction Window Size" : "30",
+      "Target Frame Rate" : "30.0",
+      "com.apple.coreml.model.preview.type" : "handActionClassifier",
+      "com.apple.createml.app.version" : "6.1"
+    },
+    "neuralNetworkLayerTypeHistogram" : {
+      "Add" : 7,
+      "SoftmaxND" : 1,
+      "ActivationReLU" : 8,
+      "ReshapeStatic" : 3,
+      "Transpose" : 4,
+      "PoolingAverage" : 8,
+      "ExpandDims" : 2,
+      "BatchNorm" : 15,
+      "InnerProduct" : 2,
+      "Squeeze" : 1,
+      "Convolution" : 20
+    },
+    "method" : "predict"
+  }
+]

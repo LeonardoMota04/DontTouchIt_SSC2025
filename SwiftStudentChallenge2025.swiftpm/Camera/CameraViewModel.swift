@@ -10,35 +10,47 @@ import AVFoundation
 import UIKit
 
 class CameraViewModel: ObservableObject {
+    // MARK: - MANAGERS
     private let cameraManager = CameraManager()
     private let handPoseManager = HandPoseManager()
     private let faceManager = FaceManager()
     let viewController = CubeViewController()
 
+    // MARK: - PUBLISHERS VARIABLES
+    @Published var showPermissionAlert: Bool = false
+
     @Published var predictedAction: HandAction?
-    @Published var headInclination: HeadInclination?
     @Published var distanceFromCenter: HeadDistanceFromCenter?
     @Published var currentAppState: AppState = .home {
         didSet { viewController.updateAppState(currentAppState) }
     }
 
-    private var stateAction: AppStateAction?
-
     init() {
         cameraManager.delegate = self
-        cameraManager.startSession()
-
+        setupManagers()
+    }
+    
+    // MANAGERS
+    private func setupManagers() {
+        // HAND ACTIONS RESULTS
         handPoseManager.onPredictionUpdate = { [weak self] action in
             self?.predictedAction = action
-            self?.viewController.handAction = action
-            self?.stateAction?.handleHandAction(action)
+            self?.viewController.handAction = action // viewController call
         }
 
-        faceManager.onFaceDataUpdate = { [weak self] inclination, distance in
-            self?.headInclination = inclination
-            self?.distanceFromCenter = distance
-            self?.viewController.headDistanceFromCenter = distance
-            self?.stateAction?.handleHeadDistance(distance)
+        // FACE RESULTS
+         faceManager.onFaceDataUpdate = { [weak self] distance in
+             self?.distanceFromCenter = distance
+             self?.viewController.headDistanceFromCenter = distance // viewController call
+         }
+    }
+
+    // CAMERA PERMISSION
+    func checkCameraPermission() {
+        if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
+            cameraManager.startSession()
+        } else {
+            showPermissionAlert = true
         }
     }
     
@@ -46,64 +58,20 @@ class CameraViewModel: ObservableObject {
         cameraManager.stopSession()
     }
 
-    func getCaptureSession() -> AVCaptureSession {
+    func getCaptureSession() -> AVCaptureSession { // getter
         return cameraManager.captureSession
     }
 }
 
-
 extension CameraViewModel: CameraManagerDelegate {
+    func cameraManagerDidFailWithError(_ manager: CameraManager, error: CameraManager.CameraError) {
+        DispatchQueue.main.async {
+            self.showPermissionAlert = true
+        }
+    }
+    
     func cameraManager(_ manager: CameraManager, didCapture sampleBuffer: CMSampleBuffer) {
         handPoseManager.processHandPose(from: sampleBuffer)
         faceManager.processFace(from: sampleBuffer)
-    }
-}
-
-
-
-
-protocol AppStateAction {
-    func handleHeadDistance(_ distance: HeadDistanceFromCenter)
-    func handleHandAction(_ action: HandAction)
-    func getStateDescription() -> String
-}
-
-class HomeStateAction: AppStateAction {
-    func handleHeadDistance(_ distance: HeadDistanceFromCenter) {
-//        if distance.horizontal < 20 {
-//            print("Home state: Head close to esqerda detected")
-//        } else if distance.horizontal > 80 {
-//            print("Home state: Head close to dureuata detected")
-//        }
-    }
-
-    func handleHandAction(_ action: HandAction) {
-        // Lógica para reações a ações das mãos no estado Home
-//        switch action {
-//        case .swipeLeft:
-//            print("Home state: Swipe left detected")
-//        case .swipeRight:
-//            print("Home state: Swipe right detected")
-//        default:
-//            break
-//        }
-    }
-
-    func getStateDescription() -> String {
-        return "State: Home"
-    }
-}
-
-class StoryTellingStateAction: AppStateAction {
-    func handleHeadDistance(_ distance: HeadDistanceFromCenter) {
-        // Lógica para Storytelling: altere conforme a necessidade
-    }
-
-    func handleHandAction(_ action: HandAction) {
-        // Lógica para ações das mãos em Storytelling
-    }
-
-    func getStateDescription() -> String {
-        return "State: Story Telling"
     }
 }

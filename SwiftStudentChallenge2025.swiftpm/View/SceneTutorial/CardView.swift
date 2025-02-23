@@ -6,20 +6,21 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct CardView: View {
     let phase: SceneTutorialPhases
     let geo: GeometryProxy
     let isInteracting: Bool
     let isMainCard: Bool
-    
+
+
     var body: some View {
         let cardWidth = isInteracting ? geo.size.width / 8 : geo.size.width / 1.5
         let cardHeight = isInteracting ? geo.size.height / 8 : geo.size.height / 2
 
-        return ZStack {
-            RoundedRectangle(cornerRadius: 16)
-            
+        ZStack {
+
             if phase == .intro {
                 VStack {
                     Text(phase.title)
@@ -45,11 +46,28 @@ struct CardView: View {
                     }
                     
                     HStack {
-                        if let image = phase.image {
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: isInteracting ? 87.5 : 350)
+                        VStack(alignment: .leading) {
+                            // image
+                            if isInteracting {
+                                if let image = phase.image {
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 87.5)
+                                }
+                            // gif
+                            } else {
+                                if let gifImages = phase.gifImages {
+                                    AnimatedGIFView(frames: gifImages)
+                                } else {
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 350)
+                                    }
+                                }
+                            }
                         }
                         
                         if !isInteracting {
@@ -69,7 +87,39 @@ struct CardView: View {
         .frame(width: cardWidth, height: cardHeight)
         .glassy()
         .padding([.leading, .top], (isMainCard && !isInteracting) ? 0 : 50)
-        .frame(maxWidth: (isMainCard  && !isInteracting) ? .infinity : nil,
-               maxHeight: (isMainCard  && !isInteracting) ? .infinity : nil, alignment: .center)
+        .frame(maxWidth: (isMainCard && !isInteracting) ? .infinity : nil,
+               maxHeight: (isMainCard && !isInteracting) ? .infinity : nil, alignment: .center)
     }
 }
+
+#Preview {
+    GeometryReader { geo in
+        CardView(
+            phase: .handActionCubeRightSideRotation,
+            geo: geo,
+            isInteracting: false,
+            isMainCard: true
+        )
+        .padding()
+    }
+}
+
+
+// MARK: - GIF VIEW
+struct AnimatedGIFView: View {
+    let frames: [String]
+    @State private var currentIndex = 0
+    
+    var body: some View {
+        Image(frames[currentIndex])
+            .resizable()
+            .scaledToFit()
+            .glassy()
+            .onAppear {
+                Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+                    currentIndex = (currentIndex + 1) % frames.count
+                }
+            }
+    }
+}
+

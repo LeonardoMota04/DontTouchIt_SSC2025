@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Head distance from the screen center - horizontal and vertical
+// head distance from the screen center - horizontal and vertical
 struct HeadDistanceFromCenter: Equatable {
     let horizontal: CGFloat
     let vertical: CGFloat

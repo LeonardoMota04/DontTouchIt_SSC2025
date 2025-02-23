@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct CustomButton: View {
+    @EnvironmentObject private var cameraVM: CameraViewModel
+
     let icon: String
     let action: () -> Void
     var size: CGFloat = 80

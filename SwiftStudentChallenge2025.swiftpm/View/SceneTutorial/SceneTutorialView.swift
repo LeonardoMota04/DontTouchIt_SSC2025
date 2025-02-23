@@ -181,34 +181,3 @@ struct SceneTutorialView: View {
     }
 }
 
-
-#Preview {
-    struct scenetutorialviewPreview: View {
-//        @State private var phase: AppState = .freeMode
-        @State private var phase: SceneTutorialPhases = .intro
-
-        var body: some View {
-//            SceneTutorialView(phase: .handActionCubeRightSideRotation, isFreeMode: true) {
-//                
-//            } onTapPhase: { newPhase in
-//                
-//            }
-            SceneTutorialView(phase: phase, isFreeMode: false) {
-                switch phase {
-                case .intro:
-                    phase = .headCameraTracking
-                case .headCameraTracking:
-                    phase = .handActionCameraRotation
-                case .handActionCameraRotation:
-                    phase = .handActionCubeRightSideRotation
-                case .handActionCubeRightSideRotation:
-                    phase = .intro
-                }
-            } onTapPhase: { newPhase in
-                phase = newPhase
-            }
-        }
-    }
-    return scenetutorialviewPreview()
-        .environmentObject(CameraViewModel())
-}

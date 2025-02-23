@@ -23,6 +23,9 @@ struct HomeView: View {
     // ANIMATION
     @State private var itemsOffset: CGFloat = 400
     
+    // SHOWING INFO CARD VIEW
+    @Binding var showInfoView: Bool
+    
     private let gradientColors = [
         Color(hex: "BD80D4"),
         Color(hex: "62436E"),
@@ -100,7 +103,7 @@ struct HomeView: View {
             }
             // ON CHANGE OF HEAD DISTANCE FROM CENTER
             .onChange(of: cameraVM.distanceFromCenter) { _, newValue in
-                guard let newValue = newValue else { return }
+                guard let newValue = newValue, !showInfoView else { return }
                 
                 let wasTilting = isTiltingHeadLEFT || isTiltingHeadRIGHT
                 
@@ -176,7 +179,7 @@ struct TitleView: View {
     }
 }
 
-// MARK: -CIRCLE Progress View
+// MARK: - CIRCLE Progress View
 struct CircularProgressView: View {
     var progress: CGFloat
     
@@ -195,6 +198,6 @@ struct CircularProgressView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(showInfoView: .constant(false))
         .environmentObject(CameraViewModel())
 }

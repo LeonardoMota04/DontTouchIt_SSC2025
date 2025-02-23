@@ -5,7 +5,6 @@
 //  Created by Leonardo Mota on 19/02/25.
 //
 
-
 import SwiftUI
  
 struct AlertCardView: View {
@@ -54,7 +53,7 @@ struct AlertCardView: View {
         }
         .ignoresSafeArea()
         .overlay(alignment: .bottomTrailing) {
-            // MARK: - BOTÃO
+            // MARK: - BUTTON
             CustomButton(icon: "arrow.right") {
                 withAnimation { onTap() }
             }
@@ -62,34 +61,4 @@ struct AlertCardView: View {
             .ignoresSafeArea()
         }
     }
-}
-
-
-
-#Preview {
-    struct AlertCardPreview: View {
-        @State private var phase: AlertsCardsPhases = .onlyOneHead
-        
-        var body: some View {
-            VStack {
-                AlertCardView(phase: phase) {
-                    withAnimation {
-                        switch phase {
-                        case .onlyOneHead:
-                            phase = .distanceToTheScreen
-                        case .distanceToTheScreen:
-                            phase = .enoughLight
-                        case .enoughLight:
-                            phase = .handsVisible
-                        case .handsVisible:
-                            phase = .onlyOneHead
-                        }
-                    }
-                }
-                
-            }
-        }
-    }
-    
-    return AlertCardPreview()
 }

@@ -24,7 +24,6 @@ struct GlassStyle<S: Shape>: ViewModifier {
     func body(content: Content) -> some View {
         let baseColor = Color.accentColor
         let bgGradientColor: Gradient = Gradient(colors: [baseColor.opacity(0.15), Color.clear])
-        let textColor = Color(.sRGB, red: 0.4, green: 0.4, blue: 0.4, opacity: 1)
         
         content
             .foregroundStyle(.clear)
@@ -76,7 +75,6 @@ struct GlassStyle<S: Shape>: ViewModifier {
             .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 8)
             .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 3)
             .overlay {
-//                RoundedRectangle(cornerRadius: cornerRadius)
                 shape
                     .stroke(LinearGradient(colors: gradientColors,
                                            startPoint: .topLeading,
@@ -91,25 +89,4 @@ struct GlassStyle<S: Shape>: ViewModifier {
                 .blur(radius: 20)
             }
     }
-}
-
-#Preview {
-    ZStack {
-        //Image(.concrete).ignoresSafeArea()
-        
-        VStack {
-//            Text("ooiiiiiooooo")
-//                .padding()
-//                .foregroundStyle(.white)
-//                .font(.largeTitle)
-//                .glassy()
-            
-            Circle()
-                //.foregroundStyle(.clear)
-                .glassy(shape: Circle())
-                .frame(width: 400)
-        }
-    }
-    
-
 }

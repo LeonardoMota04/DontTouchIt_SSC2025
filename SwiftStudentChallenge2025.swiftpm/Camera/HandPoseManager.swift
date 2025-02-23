@@ -11,8 +11,8 @@ import UIKit
 
 class HandPoseManager {
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
-    private let handActionModel = try? LeoSSC2025(configuration: MLModelConfiguration())
-    private let confidenceThreshold: Float = 0.9
+    private let handActionModel = try? DontTouchIt_HandActionClassifier(configuration: MLModelConfiguration())
+    private let confidenceThreshold: Float = 0.85 // 85% CONFIDENCE
     private var queue: [MLMultiArray] = []
     private let queueSize = 30
     
@@ -65,21 +65,4 @@ class HandPoseManager {
             }
         }
     }
-    
-    // getting ipad orientation
-    func currentOrientation() -> CGImagePropertyOrientation {
-        let orientation = UIDevice.current.orientation
-        
-        switch orientation {
-        case .landscapeLeft:
-            return .right
-        case .landscapeRight:
-            return .left
-        case .portraitUpsideDown:
-            return .up
-        default:
-            return .down
-        }
-    }
-
 }
