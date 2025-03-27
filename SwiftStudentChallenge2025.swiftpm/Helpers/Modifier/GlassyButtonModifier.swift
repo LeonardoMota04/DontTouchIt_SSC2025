@@ -12,10 +12,17 @@ struct CustomButton: View {
 
     let icon: String
     let action: () -> Void
-    var size: CGFloat = 80
+    var size: CGFloat
     var iconColor: Color = .white.opacity(0.7)
     var backgroundColor: Color = .clear
-    
+
+    init(icon: String, action: @escaping () -> Void) {
+        self.icon = icon
+        self.action = action
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        self.size = isPad ? 80 : 50
+    }
+
     var body: some View {
         Button(action: action) {
             RoundedRectangle(cornerRadius: 16)
@@ -24,7 +31,7 @@ struct CustomButton: View {
                 .overlay {
                     Image(systemName: icon)
                         .foregroundStyle(iconColor)
-                        .font(.largeTitle)
+                        .font(.system(size: size * 0.4))
                         .shadow(radius: 5)
                 }
                 .glassy()
@@ -32,3 +39,5 @@ struct CustomButton: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
+
+

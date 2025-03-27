@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 // dealing with different camera positions on newest iPad models
 class UserIpadSchemaManager {
@@ -15,12 +16,16 @@ class UserIpadSchemaManager {
         UserDefaults.standard.set(position.rawValue, forKey: cameraPositionKey)
     }
 
-    static func getCameraPosition() -> CameraPositionOnRealIpad? {
-        if let savedValue = UserDefaults.standard.string(forKey: cameraPositionKey),
-           let position = CameraPositionOnRealIpad(rawValue: savedValue) {
-            return position
+    static func getCameraPosition() -> CameraPositionOnRealIpad {
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        
+        if isPad {
+            if let savedValue = UserDefaults.standard.string(forKey: cameraPositionKey),
+               let position = CameraPositionOnRealIpad(rawValue: savedValue) {
+                return position
+            }
         }
-        return nil
+        
+        return .top
     }
-    
 }

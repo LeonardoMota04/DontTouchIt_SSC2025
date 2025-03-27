@@ -25,7 +25,7 @@ struct HomeView: View {
     
     // SHOWING INFO CARD VIEW
     @Binding var showInfoView: Bool
-    
+        
     private let gradientColors = [
         Color(hex: "BD80D4"),
         Color(hex: "62436E"),
@@ -36,7 +36,9 @@ struct HomeView: View {
         GeometryReader { geo in
             let width = geo.size.width
             let height = geo.size.height
-            
+            let isIPad = UIDevice.current.userInterfaceIdiom == .pad
+            let paddingValue = max(width * 0.02, 30)
+
             VStack {
                 // TITLE
                 TitleView(itemsOffset: $itemsOffset)
@@ -49,18 +51,19 @@ struct HomeView: View {
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
 
-                    
                     Image("tiltYourHead")
-                    
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: width * (isIPad ? 0.15 : 0.1)) 
                     Text("LEFT to full experience and RIGHT to free mode")
                 }
-                .font(.title3)
+                .font(.system(size: height * 0.03))
                 .foregroundStyle(.white)
                 .offset(y: itemsOffset)
                 
             }
             .ignoresSafeArea()
-            .padding(.vertical, 50)
+            .padding(.vertical, paddingValue)
             .frame(width: width, height: height)
             .overlay {
                 // PURPLE SIDES
@@ -162,22 +165,31 @@ struct HomeView: View {
 // MARK: TITLE VIEW
 struct TitleView: View {
     @Binding var itemsOffset: CGFloat
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: -15) {
-            Text("DON'T")
-            Text("TOUCH")
-                .foregroundStyle(.purple)
-                .bold()
-            Text("IT")
-        }
-        .font(.system(size: 80, weight: .light))
-        .foregroundStyle(.white)
-        .opacity(0.8)
-        .offset(y: -itemsOffset)
 
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let height = geometry.size.height
+            let isIPad = UIDevice.current.userInterfaceIdiom == .pad
+            let fontSize = width * (isIPad ? 0.08 : 0.06)
+
+            VStack(alignment: .leading, spacing: -fontSize * 0.3) {
+                Text("DON'T")
+                Text("TOUCH")
+                    .foregroundStyle(.purple)
+                    .bold()
+                Text("IT")
+            }
+            .font(.system(size: fontSize, weight: .light))
+            .foregroundStyle(.white)
+            .opacity(0.8)
+            .offset(y: -itemsOffset)
+            .frame(width: width)
+        }
     }
 }
+
+
 
 // MARK: - CIRCLE Progress View
 struct CircularProgressView: View {
@@ -200,4 +212,5 @@ struct CircularProgressView: View {
 #Preview {
     HomeView(showInfoView: .constant(false))
         .environmentObject(CameraViewModel())
+        .background(Color.black.opacity(0.8))
 }

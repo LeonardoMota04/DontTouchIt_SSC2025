@@ -37,7 +37,7 @@ struct SceneTutorialView: View {
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
-            
+
             ZStack(alignment: .topLeading) {
                 phaseBackgroundCards(geo: geo, width: width)
                 mainPhaseCard(geo: geo)
@@ -53,6 +53,7 @@ struct SceneTutorialView: View {
     // MARK: - SUBVIESW
     @ViewBuilder
     private func phaseBackgroundCards(geo: GeometryProxy, width: CGFloat) -> some View {
+        
         HStack(spacing: 0) {
             ForEach(SceneTutorialPhases.allCases.filter { ($0 != phase && $0 != .intro) }, id: \ .self) { phaseItem in
                 CardView(phase: phaseItem, geo: geo, isInteracting: true, isMainCard: false)
@@ -62,7 +63,7 @@ struct SceneTutorialView: View {
                     .contentShape(Rectangle())
             }
         }
-        .padding(.leading, isInteractingWithTheCube ? (width / 8 + 50) : 0)
+        .padding(.leading, isInteractingWithTheCube ? (width / 6 + 30) : 0)
     }
     
     @ViewBuilder
@@ -181,3 +182,26 @@ struct SceneTutorialView: View {
     }
 }
 
+
+#Preview {
+    // Mock para o ViewModel
+    let mockCameraVM = CameraViewModel()
+
+    // Mock para onTap e onTapPhase
+    let mockOnTap: () -> Void = {
+        print("Tapped!")
+    }
+    let mockOnTapPhase: (SceneTutorialPhases) -> Void = { phase in
+        print("Tapped on phase: \(phase)")
+    }
+
+    // Preview para iPhone
+    SceneTutorialView(
+        phase: .handActionCameraRotation,
+        isFreeMode: false,
+        onTap: mockOnTap,
+        onTapPhase: mockOnTapPhase
+    )
+    .environmentObject(mockCameraVM)
+    .background(Color.gray)
+}

@@ -13,13 +13,18 @@ struct CardView: View {
     let isInteracting: Bool
     let isMainCard: Bool
 
-
     var body: some View {
-        let cardWidth = isInteracting ? geo.size.width / 8 : geo.size.width / 1.5
-        let cardHeight = isInteracting ? geo.size.height / 8 : geo.size.height / 2
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
 
+        let cardWidth = isInteracting
+        ? geo.size.width / (isPad ? 8 : 6)
+        : geo.size.width / (isPad ? 1.5 : 1.3)
+        let cardHeight = isInteracting
+        ? geo.size.height / (isPad ? 8 : 5)
+        : geo.size.height / (isPad ? 2 : 1.2)
+
+        
         ZStack {
-
             if phase == .intro {
                 VStack {
                     Text(phase.title)
@@ -39,7 +44,7 @@ struct CardView: View {
                     if !isInteracting {
                         Text(phase.title)
                             .foregroundStyle(.white)
-                            .font(.system(size: 50))
+                            .font(isPad ? .system(size: 50) : .largeTitle)
                             .fontWeight(.bold)
                             .padding(.leading, 50)
                     }
@@ -72,24 +77,26 @@ struct CardView: View {
                         if !isInteracting {
                             Spacer()
                             
+                            // Ajuste da fonte conforme o dispositivo
                             Text(phase.description)
                                 .foregroundStyle(.white)
-                                .font(.body)
+                                .font(isPad ? .body : .footnote)
                                 .fontWeight(.medium)
-                                .padding(.horizontal)
+                                .padding(.leading)
                         }
                     }
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, 30)
                 }
             }
         }
         .frame(width: cardWidth, height: cardHeight)
         .glassy()
-        .padding([.leading, .top], (isMainCard && !isInteracting) ? 0 : 50)
+        .padding([.leading, .top], (isMainCard && !isInteracting) ? 0 : 30)
         .frame(maxWidth: (isMainCard && !isInteracting) ? .infinity : nil,
                maxHeight: (isMainCard && !isInteracting) ? .infinity : nil, alignment: .center)
     }
 }
+
 
 #Preview {
     GeometryReader { geo in
