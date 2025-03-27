@@ -1,6 +1,7 @@
 # "Don’t Touch It" - WWDC 2025 Swift Student Challenge Winner Submission
-
 Don’t Touch It is an immersive experience that blends the real and digital worlds through touchless interactions. Using head tracking and hand gestures, users experience how current technologies enable new forms of interaction, with a cube symbolizing how we stay present in the real world while immersed in the virtual.
+
+![Image](https://github.com/user-attachments/assets/a294eaf2-cf01-49fa-8fbf-8eaf5fe826b9)
 
 # Technology & Frameworks used
 - UIKit: for cube and camera manipulation, scene setup, lights, and configuration.
