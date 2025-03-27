@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AVKit
 
 struct CardView: View {
     let phase: SceneTutorialPhases

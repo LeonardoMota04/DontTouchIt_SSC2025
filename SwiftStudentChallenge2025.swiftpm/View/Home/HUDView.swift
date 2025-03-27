@@ -56,9 +56,10 @@ struct CardInfoView: View {
     @EnvironmentObject private var cameraVM: CameraViewModel
 
     @State private var itemsOffset: CGFloat = 300
-    @State private var selectedPosition: CameraPositionOnRealIpad?
+    @State private var selectedPosition: CameraPositionOnRealIpad? = nil // Remover valor inicial
     
     @Binding var showInfoView: Bool
+    @State private var showAlert = false // Para exibir o alerta
 
     var body: some View {
         HStack(alignment: .top) {
@@ -88,26 +89,27 @@ struct CardInfoView: View {
         .onAppear {
             withAnimation(Animation.bouncy(duration: 1.5).delay(0.5)) {
                 itemsOffset = 0
-                if UserIpadSchemaManager.getCameraPosition() == nil {
-                    selectedPosition = .top
-                } else {
-                    selectedPosition = UserIpadSchemaManager.getCameraPosition()
-                }
             }
         }
         
         // X BUTTON
         .overlay(alignment: .topTrailing) {
             CustomButton(icon: "xmark") {
-                withAnimation { showInfoView = false }
-                cameraVM.checkCameraPermission()
+                if selectedPosition == nil {
+                    showAlert = true // alert if no iPad schema selection
+                } else {
+                    withAnimation {
+                        showInfoView = false
+                    }
+                    cameraVM.checkCameraPermission()
+                }
             }
             .padding([.top, .trailing], -40)
         }
         // iPad buttons
         .overlay(alignment: .bottomTrailing) {
             VStack {
-                Text("Where is your iPad's front camera?")
+                Text("Select your iPad's front camera position:")
                     .multilineTextAlignment(.center)
                     .font(.callout)
                 HStack(spacing: 70) {
@@ -153,6 +155,18 @@ struct CardInfoView: View {
         .background {
             Color.black.opacity(0.9).blur(radius: 5).ignoresSafeArea()
         }
+        .onAppear {
+            if let currentIpadSchema = UserIpadSchemaManager.getCameraPosition() {
+                selectedPosition = currentIpadSchema
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Please choose an iPad schema"),
+                message: Text("You must select either the top or side camera position to proceed."),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
 
     // userdefaults info save
@@ -161,6 +175,7 @@ struct CardInfoView: View {
         UserIpadSchemaManager.saveCameraPosition(position)
     }
 }
+
 
 #Preview {
     CardInfoView(showInfoView: .constant(true))

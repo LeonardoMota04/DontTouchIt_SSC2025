@@ -33,7 +33,7 @@ struct AlertCardView: View {
                     
                     Text(phase.description)
                         .foregroundStyle(.white)
-                        .font(.headline)
+                        .font(.footnote)
                         .padding(.bottom)
                 }
                 .padding(15)
@@ -60,5 +60,11 @@ struct AlertCardView: View {
             .padding(50)
             .ignoresSafeArea()
         }
+    }
+}
+
+#Preview {
+    AlertCardView(phase: .handsVisible) {
+        
     }
 }
